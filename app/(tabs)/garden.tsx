@@ -72,7 +72,11 @@ export default function GardenScreen() {
       ) : (
         <View style={styles.grid}>
           {plants.map((plant) => (
-            <View key={plant.habit.id} style={styles.gridItem}>
+            <Pressable 
+              key={plant.habit.id} 
+              style={styles.gridItem}
+              onPress={() => router.push(`/plants/${plant.habit.id}` as any)}
+            >
               <Plant 
                 stage={plant.streak.plantStage} 
                 health={plant.streak.healthState} 
@@ -80,7 +84,7 @@ export default function GardenScreen() {
                 label={plant.habit.name} 
                 size={100} 
               />
-            </View>
+            </Pressable>
           ))}
         </View>
       )}

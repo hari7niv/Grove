@@ -15,6 +15,7 @@ export interface GardenPlant {
   habit: Habit;
   category: Category;
   streak: StreakInfo;
+  activities: DayActivity[];
 }
 
 interface GardenState {
@@ -90,6 +91,7 @@ export const useGardenStore = create<GardenState>((set) => ({
           habit,
           category,
           streak,
+          activities: dayActivities,
         });
       }
 

@@ -255,6 +255,32 @@ export const RefreshIcon = makeIcon(() => (
   </>
 ));
 
+// ─── Gamification & Badges ─────────────────────────────────────
+
+export const FireIcon = makeIcon(() => (
+  <>
+    <Path d="M12 2C12 2 15 5 15 9C15 13 12 16 12 16C12 16 9 13 9 9C9 5 12 2 12 2Z" />
+    <Path d="M12 2C12 2 18 5 19 12C20 18 17 22 12 22C7 22 4 18 5 12C6 5 12 2 12 2Z" />
+  </>
+));
+
+export const TrophyIcon = makeIcon(() => (
+  <>
+    <Path d="M8 21H16" />
+    <Path d="M12 17V21" />
+    <Path d="M7 4H17V10C17 12.7614 14.7614 15 12 15C9.23858 15 7 12.7614 7 10V4Z" />
+    <Path d="M7 6H4V9C4 10.6569 5.34315 12 7 12" />
+    <Path d="M17 6H20V9C20 10.6569 18.6569 12 17 12" />
+  </>
+));
+
+export const ShieldIcon = makeIcon(() => (
+  <>
+    <Path d="M12 22S8 18 8 12V5L12 3L16 5V12C16 18 12 22 12 22Z" />
+    <Path d="M12 3V22" />
+  </>
+));
+
 // ─── Icon map for dynamic lookup ────────────────────────────────
 
 export const icons = {
@@ -287,6 +313,9 @@ export const icons = {
   externalLink: ExternalLinkIcon,
   trash: TrashIcon,
   refresh: RefreshIcon,
+  fire: FireIcon,
+  trophy: TrophyIcon,
+  shield: ShieldIcon,
 } as const;
 
 export type IconName = keyof typeof icons;
