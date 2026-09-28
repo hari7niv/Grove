@@ -7,6 +7,8 @@ import { spacing, maxContentWidth } from '@/src/design/tokens';
 import { useRepositories } from '@/src/db/provider';
 import { ChevronLeftIcon } from '@/src/components/ui/Icon';
 import type { AppSettings } from '@/src/types/models';
+import { getDatabase } from '@/src/db/connection';
+import { exportDatabase, importDatabase, downloadJson, pickJsonFile } from '@/src/engine/export-import';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -42,6 +44,58 @@ export default function SettingsScreen() {
   const handleReset = () => {
     // Reset database logic would go here
     alert('Reset functionality coming soon');
+  };
+
+  const handleExport = async () => {
+    try {
+      const db = await getDatabase();
+      const exportData = await exportDatabase(db);
+      await downloadJson(`grove_backup_${new Date().toISOString().split('T')[0]}.json`, JSON.stringify(exportData, null, 2));
+    } catch (e) {
+      console.error(e);
+      alert('Failed to export data');
+    }
+  };
+
+  const handleImport = async () => {
+    try {
+      const jsonStr = await pickJsonFile();
+      if (!jsonStr) return; // User cancelled
+
+      // Parse JSON safely
+      let data;
+      try {
+        data = JSON.parse(jsonStr);
+      } catch (e) {
+        alert('Invalid JSON file.');
+        return;
+      }
+
+      Alert.alert(
+        'Import Data',
+        'This will replace all your current data. This action cannot be undone. Are you sure?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Import',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                const db = await getDatabase();
+                await importDatabase(db, data);
+                alert('Import successful. Please restart the app.');
+              } catch (e) {
+                console.error(e);
+                alert('Failed to import data: ' + (e as Error).message);
+              }
+            }
+          }
+        ]
+      );
+    } catch (e) {
+      console.error(e);
+      alert('Failed to process file');
+    }
   };
 
   if (loading || !settings) return null;
@@ -140,10 +194,10 @@ export default function SettingsScreen() {
         {/* Data & Privacy */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Data & Privacy</Text>
-          <Pressable style={styles.actionBtn}>
+          <Pressable style={styles.actionBtn} onPress={handleExport}>
             <Text style={styles.actionBtnText}>Export Data (Backup)</Text>
           </Pressable>
-          <Pressable style={styles.actionBtn}>
+          <Pressable style={styles.actionBtn} onPress={handleImport}>
             <Text style={styles.actionBtnText}>Import Data</Text>
           </Pressable>
           <Pressable style={[styles.actionBtn, styles.dangerBtn]} onPress={handleReset}>
