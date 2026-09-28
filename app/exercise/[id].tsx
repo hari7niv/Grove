@@ -11,7 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme, type Theme } from '@/src/design/theme';
 import { spacing } from '@/src/design/tokens';
 import { useRepositories } from '@/src/db/provider';
-import { ChevronLeftIcon, PlayIcon, PauseIcon, CheckIcon } from '@/src/components/ui/Icon';
+import { ChevronLeftIcon, PlayIcon, PauseIcon, CheckIcon, SettingsIcon } from '@/src/components/ui/Icon';
 import type { Exercise } from '@/src/types/models';
 import { nowISO, getLogicalDate } from '@/src/utils/date';
 
@@ -145,7 +145,9 @@ export default function ExerciseSessionScreen() {
           <ChevronLeftIcon size={24} color={theme.colors.textPrimary} />
         </Pressable>
         <Text style={styles.title}>{exercise.name}</Text>
-        <View style={{ width: 24 }} />
+        <Pressable onPress={() => router.push(`/exercise/edit/${exercise.id}` as any)} style={styles.backButton}>
+          <SettingsIcon size={24} color={theme.colors.textPrimary} />
+        </Pressable>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>

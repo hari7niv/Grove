@@ -65,8 +65,7 @@ export default function ExercisesScreen() {
             if (activeTab === 'routines') {
               router.push('/routine/new' as any);
             } else {
-              // TODO: Add exercise builder
-              alert('Exercise builder coming in polish phase!');
+              router.push('/exercise/new' as any);
             }
           }}
         >
