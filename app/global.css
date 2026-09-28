@@ -1,0 +1,6 @@
+/* Fix for React Native Web ScrollView not scrolling on some configurations */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}

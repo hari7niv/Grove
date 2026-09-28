@@ -9,7 +9,12 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import { Platform } from 'react-native';
 import 'react-native-reanimated';
+
+if (Platform.OS === 'web') {
+  require('./global.css');
+}
 
 import { ThemeProvider, useTheme } from '@/src/design/theme';
 import { DatabaseProvider, useDatabase } from '@/src/db/provider';
