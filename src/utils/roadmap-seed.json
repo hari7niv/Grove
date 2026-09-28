@@ -1,0 +1,554 @@
+{
+  "version": 1,
+  "meta": {
+    "description": "Personal learning roadmap seed. Hierarchy: Track > Section > Topic > Subtopic. Merged and deduplicated from the master list, the ML Infra tracker, and the SWE tracker.",
+    "targets": [
+      { "id": "ml_infra", "name": "ML Infra / Applied ML Engineer", "primary": true },
+      { "id": "swe", "name": "Software Developer (Backend / Full-Stack)", "primary": false }
+    ],
+    "depthLevels": {
+      "deep": "Learn thoroughly, be able to explain and apply it in projects and interviews",
+      "practical": "Working knowledge for real-world use",
+      "moderate": "Solid understanding, not full mastery",
+      "conceptual": "Interview-level theory only",
+      "awareness": "Know what it is and when it matters",
+      "ongoing": "Steady background practice",
+      "later": "Deprioritized, revisit later"
+    },
+    "completionRule": "Topic completion = all subtopics done, or the topic itself marked done when it has none. Section and track percentages derive from topics. Marking a topic done logs an activity for the track's category."
+  },
+  "tracks": [
+    {
+      "id": "system-design",
+      "name": "System Design and Backend Engineering",
+      "category": "Backend Systems",
+      "sections": [
+        {
+          "id": "sd-performance",
+          "title": "Performance Foundations",
+          "depth": { "ml_infra": "deep", "swe": "deep" },
+          "topics": [
+            { "title": "Caching strategies", "status": "done", "subtopics": ["Write-through", "Write-back", "Cache-aside", "TTL", "Eviction policies"] },
+            { "title": "Connection pooling", "status": "not_started" }
+          ]
+        },
+        {
+          "id": "sd-messaging",
+          "title": "Messaging and Resilience",
+          "depth": { "ml_infra": "deep", "swe": "deep" },
+          "topics": [
+            { "title": "Message queues", "status": "not_started", "note": "Kafka fundamentals beyond what has been used so far" },
+            { "title": "Event-driven architecture", "status": "not_started" },
+            { "title": "Idempotency", "status": "not_started", "subtopics": ["Idempotent consumers", "Idempotent producers"] },
+            { "title": "Retry and backoff strategies", "status": "not_started", "subtopics": ["Exponential backoff", "Jitter"] },
+            { "title": "Dead-letter queues", "status": "not_started" },
+            { "title": "Circuit breakers", "status": "not_started" }
+          ]
+        },
+        {
+          "id": "sd-scaling",
+          "title": "Scaling and Distributed Systems Theory",
+          "depth": { "ml_infra": "conceptual", "swe": "deep" },
+          "topics": [
+            { "title": "Load balancing", "status": "not_started", "subtopics": ["Algorithms", "L4 vs L7"] },
+            { "title": "Horizontal scaling", "status": "not_started" },
+            { "title": "Rate limiting", "status": "not_started", "subtopics": ["Token bucket", "Leaky bucket"] },
+            { "title": "CAP theorem", "status": "not_started" },
+            { "title": "Consistency models", "status": "not_started", "subtopics": ["Strong consistency", "Eventual consistency"] },
+            { "title": "Distributed locks", "status": "not_started", "note": "Redis locks already used; solidify the theory" }
+          ]
+        },
+        {
+          "id": "sd-architecture",
+          "title": "Architecture and Design Principles",
+          "depth": { "ml_infra": "deep", "swe": "deep" },
+          "topics": [
+            { "title": "Modular monolith architecture", "status": "not_started" },
+            { "title": "Layered architecture", "status": "not_started" },
+            { "title": "Clean architecture", "status": "not_started" },
+            { "title": "Hexagonal architecture", "status": "not_started" },
+            { "title": "Domain-driven design basics", "status": "not_started" },
+            { "title": "Separation of concerns", "status": "not_started" },
+            { "title": "Dependency inversion", "status": "not_started" },
+            { "title": "Service boundaries", "status": "not_started" },
+            { "title": "API contracts", "status": "not_started" },
+            { "title": "Backward compatibility", "status": "not_started" },
+            { "title": "Database-per-service tradeoffs", "status": "not_started" },
+            { "title": "Monolith vs microservices", "status": "not_started" }
+          ]
+        },
+        {
+          "id": "sd-correctness",
+          "title": "Correctness and Robustness",
+          "depth": { "ml_infra": "deep", "swe": "deep" },
+          "topics": [
+            { "title": "Invariants", "status": "not_started" },
+            { "title": "Preconditions and postconditions", "status": "not_started" },
+            { "title": "Input validation", "status": "not_started" },
+            { "title": "Error handling", "status": "not_started" },
+            { "title": "Exception design", "status": "not_started" },
+            { "title": "Data consistency", "status": "not_started" },
+            { "title": "Race conditions", "status": "not_started" },
+            { "title": "Concurrency bugs", "status": "not_started" },
+            { "title": "Atomicity", "status": "not_started" },
+            { "title": "Defensive programming", "status": "not_started" }
+          ]
+        },
+        {
+          "id": "sd-backend-fundamentals",
+          "title": "Backend Fundamentals",
+          "depth": { "ml_infra": "deep", "swe": "deep" },
+          "topics": [
+            { "title": "REST API design best practices", "status": "not_started", "subtopics": ["Versioning", "Pagination", "Idempotent endpoints"] },
+            { "title": "Spring Boot deeper", "status": "not_started", "subtopics": ["Spring Security and JWT edge cases", "Validation", "Exception handling"] },
+            { "title": "Java concurrency", "status": "not_started", "subtopics": ["Threads", "Executors", "Locks"], "note": "Go beyond what the order-processing project covered" },
+            { "title": "MERN stack solidification", "status": "not_started", "subtopics": ["React state management patterns", "Node.js event loop internals"] }
+          ]
+        },
+        {
+          "id": "sd-practice",
+          "title": "System Design Practice",
+          "depth": { "ml_infra": "moderate", "swe": "deep" },
+          "topics": [
+            { "title": "Design a URL shortener", "status": "not_started", "applied": true },
+            { "title": "Design a rate limiter", "status": "not_started", "applied": true },
+            { "title": "Design a notification system", "status": "not_started", "applied": true },
+            { "title": "Design a chat application", "status": "not_started", "applied": true, "note": "WebSockets, message delivery" },
+            { "title": "Mock system design interview", "status": "not_started", "applied": true, "note": "Record yourself or practice with a friend" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "databases",
+      "name": "Databases",
+      "category": "Backend Systems",
+      "sections": [
+        {
+          "id": "db-fundamentals",
+          "title": "Fundamentals",
+          "depth": { "ml_infra": "later", "swe": "deep" },
+          "topics": [
+            { "title": "Database indexing", "status": "not_started" },
+            { "title": "Database transactions", "status": "not_started" },
+            { "title": "Isolation levels", "status": "not_started", "subtopics": ["Read Committed", "Repeatable Read", "Serializable"] }
+          ]
+        },
+        {
+          "id": "db-internals",
+          "title": "Internals",
+          "depth": { "ml_infra": "later", "swe": "deep" },
+          "note": "Tested harder in general SWE interviews than in ML infra ones",
+          "topics": [
+            { "title": "B-tree indexes", "status": "not_started" },
+            { "title": "Composite indexes", "status": "not_started" },
+            { "title": "Query plans and EXPLAIN ANALYZE", "status": "not_started" },
+            { "title": "MVCC (multi-version concurrency control)", "status": "not_started" },
+            { "title": "Deadlocks", "status": "not_started", "subtopics": ["Causes", "Prevention"] }
+          ]
+        },
+        {
+          "id": "db-scaling",
+          "title": "Scaling",
+          "depth": { "ml_infra": "later", "swe": "deep" },
+          "topics": [
+            { "title": "Partitioning", "status": "not_started" },
+            { "title": "Replication", "status": "not_started", "subtopics": ["Leader-follower", "Quorum basics"] },
+            { "title": "Read/write scaling patterns", "status": "not_started" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "observability",
+      "name": "Observability",
+      "category": "Backend Systems",
+      "sections": [
+        {
+          "id": "obs-tooling",
+          "title": "Tooling",
+          "depth": { "ml_infra": "deep", "swe": "deep" },
+          "topics": [
+            { "title": "Prometheus fundamentals", "status": "not_started", "subtopics": ["Metrics", "Scraping", "PromQL basics"] },
+            { "title": "Grafana dashboards", "status": "not_started", "note": "Build dashboards from Prometheus data" },
+            { "title": "OpenTelemetry", "status": "not_started", "subtopics": ["Tracing basics"] }
+          ]
+        },
+        {
+          "id": "obs-signals",
+          "title": "Signals to Track",
+          "depth": { "ml_infra": "deep", "swe": "deep" },
+          "topics": [
+            { "title": "Request throughput (req/sec)", "status": "not_started" },
+            { "title": "Latency percentiles (p50, p95, p99)", "status": "not_started" },
+            { "title": "Error rate", "status": "not_started" },
+            { "title": "Kafka consumer lag monitoring", "status": "not_started" },
+            { "title": "Database connection pool usage monitoring", "status": "not_started" }
+          ]
+        },
+        {
+          "id": "obs-applied",
+          "title": "Applied",
+          "depth": { "ml_infra": "deep", "swe": "deep" },
+          "topics": [
+            { "title": "Add and keep extending an observability layer on the order-processing project", "status": "not_started", "applied": true, "linkedProject": "order-processing-system" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "testing",
+      "name": "Testing",
+      "category": "Backend Systems",
+      "sections": [
+        {
+          "id": "test-levels",
+          "title": "Test Levels and Techniques",
+          "depth": { "ml_infra": "deep", "swe": "deep" },
+          "topics": [
+            { "title": "Unit testing", "status": "not_started" },
+            { "title": "Integration testing", "status": "not_started" },
+            { "title": "End-to-end testing", "status": "not_started" },
+            { "title": "Contract testing", "status": "not_started" },
+            { "title": "Test doubles (mocks and stubs)", "status": "not_started" },
+            { "title": "Test fixtures", "status": "not_started" },
+            { "title": "Property-based testing", "status": "not_started" },
+            { "title": "Regression testing", "status": "not_started" }
+          ]
+        },
+        {
+          "id": "test-nonfunctional",
+          "title": "Load, Failure and Process",
+          "depth": { "ml_infra": "deep", "swe": "deep" },
+          "topics": [
+            { "title": "Load testing", "status": "not_started" },
+            { "title": "Stress testing", "status": "not_started" },
+            { "title": "Failure testing", "status": "not_started" },
+            { "title": "Test coverage", "status": "not_started" },
+            { "title": "CI test pipelines", "status": "not_started" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "networking",
+      "name": "Networking",
+      "category": "Backend Systems",
+      "sections": [
+        {
+          "id": "net-core",
+          "title": "Core Protocols",
+          "depth": { "ml_infra": "moderate", "swe": "moderate" },
+          "topics": [
+            { "title": "DNS", "status": "not_started" },
+            { "title": "TCP", "status": "not_started" },
+            { "title": "UDP", "status": "not_started" },
+            { "title": "TLS", "status": "not_started" }
+          ]
+        },
+        {
+          "id": "net-http",
+          "title": "HTTP",
+          "depth": { "ml_infra": "moderate", "swe": "moderate" },
+          "topics": [
+            { "title": "HTTP/1.1", "status": "not_started" },
+            { "title": "HTTP/2", "status": "not_started" },
+            { "title": "HTTP/3 basics", "status": "not_started" },
+            { "title": "Keep-alive", "status": "not_started" }
+          ]
+        },
+        {
+          "id": "net-mechanics",
+          "title": "Connection Mechanics",
+          "depth": { "ml_infra": "moderate", "swe": "moderate" },
+          "topics": [
+            { "title": "Connection establishment", "status": "not_started" },
+            { "title": "TCP congestion control basics", "status": "not_started" }
+          ]
+        },
+        {
+          "id": "net-infra",
+          "title": "Infrastructure and Real-time",
+          "depth": { "ml_infra": "moderate", "swe": "moderate" },
+          "topics": [
+            { "title": "Proxies", "status": "not_started" },
+            { "title": "Reverse proxies", "status": "not_started" },
+            { "title": "Load balancers", "status": "not_started" },
+            { "title": "CDN", "status": "not_started" },
+            { "title": "WebSockets", "status": "not_started" },
+            { "title": "gRPC", "status": "not_started" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "security",
+      "name": "Security",
+      "category": "Backend Systems",
+      "sections": [
+        {
+          "id": "sec-authn",
+          "title": "Authentication and Access Control",
+          "depth": { "ml_infra": "practical", "swe": "practical" },
+          "topics": [
+            { "title": "Authentication vs authorization", "status": "not_started" },
+            { "title": "Password hashing", "status": "not_started" },
+            { "title": "Session management", "status": "not_started" },
+            { "title": "JWT security", "status": "not_started" },
+            { "title": "OAuth2 basics", "status": "not_started" },
+            { "title": "RBAC", "status": "not_started" },
+            { "title": "Least privilege", "status": "not_started" }
+          ]
+        },
+        {
+          "id": "sec-web",
+          "title": "Web Vulnerabilities",
+          "depth": { "ml_infra": "practical", "swe": "practical" },
+          "topics": [
+            { "title": "Input validation", "status": "not_started" },
+            { "title": "SQL injection", "status": "not_started" },
+            { "title": "XSS", "status": "not_started" },
+            { "title": "CSRF", "status": "not_started" },
+            { "title": "SSRF", "status": "not_started" },
+            { "title": "CORS", "status": "not_started" },
+            { "title": "Secure file uploads", "status": "not_started" }
+          ]
+        },
+        {
+          "id": "sec-data",
+          "title": "Data Protection and Operations",
+          "depth": { "ml_infra": "practical", "swe": "practical" },
+          "topics": [
+            { "title": "Secrets management", "status": "not_started" },
+            { "title": "Encryption at rest", "status": "not_started" },
+            { "title": "Encryption in transit", "status": "not_started" },
+            { "title": "Dependency vulnerabilities", "status": "not_started" },
+            { "title": "Rate limiting (security angle)", "status": "not_started" },
+            { "title": "Audit logging", "status": "not_started" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "linux-os",
+      "name": "Linux and Operating Systems",
+      "category": "Backend Systems",
+      "sections": [
+        {
+          "id": "os-processes",
+          "title": "Processes and Scheduling",
+          "depth": { "ml_infra": "practical", "swe": "practical" },
+          "topics": [
+            { "title": "Processes", "status": "not_started" },
+            { "title": "Threads", "status": "not_started" },
+            { "title": "Processes vs threads", "status": "not_started" },
+            { "title": "Signals", "status": "not_started" },
+            { "title": "CPU scheduling basics", "status": "not_started" },
+            { "title": "Context switching", "status": "not_started" }
+          ]
+        },
+        {
+          "id": "os-memory-io",
+          "title": "Memory and I/O",
+          "depth": { "ml_infra": "practical", "swe": "practical" },
+          "topics": [
+            { "title": "Virtual memory", "status": "not_started" },
+            { "title": "Memory allocation", "status": "not_started" },
+            { "title": "File descriptors", "status": "not_started" },
+            { "title": "Sockets", "status": "not_started" },
+            { "title": "Pipes", "status": "not_started" },
+            { "title": "I/O", "status": "not_started" }
+          ]
+        },
+        {
+          "id": "os-system",
+          "title": "Permissions and Environment",
+          "depth": { "ml_infra": "practical", "swe": "practical" },
+          "topics": [
+            { "title": "Permissions", "status": "not_started" },
+            { "title": "Environment variables", "status": "not_started" }
+          ]
+        },
+        {
+          "id": "os-tools",
+          "title": "Command-line Tools",
+          "depth": { "ml_infra": "practical", "swe": "practical" },
+          "topics": [
+            { "title": "ps", "status": "not_started" },
+            { "title": "top and htop", "status": "not_started" },
+            { "title": "lsof", "status": "not_started" },
+            { "title": "netstat and ss", "status": "not_started" },
+            { "title": "curl", "status": "not_started" },
+            { "title": "grep", "status": "not_started" },
+            { "title": "awk", "status": "not_started" },
+            { "title": "sed", "status": "not_started" },
+            { "title": "strace", "status": "not_started" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "debugging",
+      "name": "Debugging",
+      "category": "Backend Systems",
+      "sections": [
+        {
+          "id": "dbg-method",
+          "title": "Method",
+          "depth": { "ml_infra": "practical", "swe": "practical" },
+          "topics": [
+            { "title": "Reproduce the problem", "status": "not_started" },
+            { "title": "Form a hypothesis", "status": "not_started" },
+            { "title": "Gather evidence", "status": "not_started" },
+            { "title": "Narrow the search space", "status": "not_started" },
+            { "title": "Root-cause analysis", "status": "not_started" },
+            { "title": "Fix validation", "status": "not_started" },
+            { "title": "Regression prevention", "status": "not_started" }
+          ]
+        },
+        {
+          "id": "dbg-tools",
+          "title": "Tools",
+          "depth": { "ml_infra": "practical", "swe": "practical" },
+          "topics": [
+            { "title": "Inspect logs", "status": "not_started" },
+            { "title": "Inspect metrics", "status": "not_started" },
+            { "title": "Inspect traces", "status": "not_started" },
+            { "title": "Debugger usage", "status": "not_started" },
+            { "title": "Profiling", "status": "not_started" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "deployment",
+      "name": "Deployment and DevOps",
+      "category": "Backend Systems",
+      "sections": [
+        {
+          "id": "dep-core",
+          "title": "Containers, CI/CD and Kubernetes Basics",
+          "depth": { "ml_infra": "awareness", "swe": "moderate" },
+          "note": "Docker comfort is assumed for ML Infra; needed at moderate depth for SWE roles",
+          "topics": [
+            { "title": "Docker", "status": "not_started", "subtopics": ["Multi-stage builds", "docker-compose"] },
+            { "title": "Basic CI/CD concepts", "status": "not_started", "subtopics": ["Build", "Test", "Deploy pipeline"] },
+            { "title": "Kubernetes fundamentals", "status": "not_started", "subtopics": ["Pods", "Deployments", "Services"], "depthOverride": { "ml_infra": "later", "swe": "moderate" } }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rag",
+      "name": "RAG and Retrieval",
+      "category": "AI/ML",
+      "sections": [
+        {
+          "id": "rag-core",
+          "title": "Retrieval and Evaluation",
+          "depth": { "ml_infra": "deep", "swe": "later" },
+          "note": "Extends the existing RAG project",
+          "topics": [
+            { "title": "Hybrid retrieval", "status": "not_started", "subtopics": ["Lexical", "Dense"] },
+            { "title": "Cross-encoder reranking", "status": "not_started" },
+            { "title": "RAG evaluation", "status": "not_started", "subtopics": ["recall@k", "MRR", "Faithfulness", "Groundedness"] },
+            { "title": "Agentic RAG", "status": "not_started", "subtopics": ["Multi-step retrieval", "Query planning"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "inference-optimization",
+      "name": "Inference Optimization",
+      "category": "AI/ML",
+      "sections": [
+        {
+          "id": "inf-core",
+          "title": "Serving and Efficiency",
+          "depth": { "ml_infra": "deep", "swe": "later" },
+          "note": "Extends the model compression and inference optimization project",
+          "topics": [
+            { "title": "LLM quantization", "status": "not_started", "subtopics": ["INT8", "INT4", "GPTQ and AWQ concepts"] },
+            { "title": "KV cache mechanics", "status": "not_started" },
+            { "title": "PagedAttention", "status": "not_started", "subtopics": ["Concept", "Why vLLM uses it"] },
+            { "title": "vLLM practical usage", "status": "not_started", "subtopics": ["Serving a model with it"] },
+            { "title": "Speculative decoding", "status": "not_started", "subtopics": ["Conceptual understanding"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "llm-evaluation",
+      "name": "LLM and Model Evaluation",
+      "category": "AI/ML",
+      "sections": [
+        {
+          "id": "eval-core",
+          "title": "Evaluation",
+          "depth": { "ml_infra": "deep", "swe": "later" },
+          "topics": [
+            { "title": "LLM evaluation frameworks and metrics", "status": "not_started", "note": "General, beyond RAG-specific" },
+            { "title": "Benchmark design", "status": "not_started", "note": "How to build a fair eval harness" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "light-exposure",
+      "name": "Light Exposure",
+      "category": "AI/ML",
+      "sections": [
+        {
+          "id": "light-core",
+          "title": "Awareness Only",
+          "depth": { "ml_infra": "awareness", "swe": "later" },
+          "topics": [
+            { "title": "LoRA and QLoRA", "status": "not_started", "note": "Practical fine-tuning concept" },
+            { "title": "MCP (Model Context Protocol)", "status": "not_started", "note": "Awareness level" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dsa",
+      "name": "DSA Practice",
+      "category": "DSA",
+      "sections": [
+        {
+          "id": "dsa-ongoing",
+          "title": "Ongoing Practice",
+          "depth": { "ml_infra": "ongoing", "swe": "deep" },
+          "note": "DSA matters more for general SWE interviews than for ML infra ones",
+          "topics": [
+            { "title": "DSA practice at a steady pace", "status": "not_started", "recurring": true },
+            { "title": "LeetCode past 300 solved", "status": "not_started", "note": "Focus on medium and hard graph and DP problems", "depthOverride": { "ml_infra": "ongoing", "swe": "deep" } },
+            { "title": "System-design-adjacent problems", "status": "not_started", "subtopics": ["LRU cache", "Rate limiter design questions"], "depthOverride": { "ml_infra": "later", "swe": "deep" } }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "deprioritized",
+      "name": "Deprioritized (Revisit Later)",
+      "category": "AI/ML",
+      "sections": [
+        {
+          "id": "later-ml",
+          "title": "Advanced ML Topics",
+          "depth": { "ml_infra": "later", "swe": "later" },
+          "topics": [
+            { "title": "Kubernetes advanced", "status": "not_started", "subtopics": ["Ingress", "HPA", "ConfigMaps", "Secrets"], "note": "Only pick up if a job posting asks for it" },
+            { "title": "LLM pretraining and SFT from scratch", "status": "not_started" },
+            { "title": "DPO and RLHF", "status": "not_started" },
+            { "title": "Distributed training", "status": "not_started", "subtopics": ["FSDP", "DeepSpeed", "ZeRO"] },
+            { "title": "Mixture of Experts", "status": "not_started" },
+            { "title": "Multimodal LLMs", "status": "not_started" },
+            { "title": "Diffusion models", "status": "not_started" },
+            { "title": "CUDA programming", "status": "not_started" },
+            { "title": "FlashAttention internals", "status": "not_started" }
+          ]
+        }
+      ]
+    }
+  ]
+}
