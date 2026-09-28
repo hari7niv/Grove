@@ -13,7 +13,8 @@ import { spacing } from '@/src/design/tokens';
 import { useRepositories } from '@/src/db/provider';
 import { ChevronLeftIcon, PlayIcon, PauseIcon, CheckIcon, ChevronRightIcon } from '@/src/components/ui/Icon';
 import type { Routine, Exercise } from '@/src/types/models';
-import { nowISO, getLogicalDate } from '@/src/utils/date';
+import { nowISO } from '@/src/utils/date';
+import { useActivityLogger } from '@/src/hooks/useActivityLogger';
 
 export default function RoutineRunnerScreen() {
   const { id } = useLocalSearchParams();
@@ -22,6 +23,7 @@ export default function RoutineRunnerScreen() {
   const insets = useSafeAreaInsets();
   const styles = makeStyles(theme);
   const repositories = useRepositories();
+  const { logActivity } = useActivityLogger();
 
   const [routine, setRoutine] = useState<Routine | null>(null);
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -144,18 +146,14 @@ export default function RoutineRunnerScreen() {
     // Water garden using the first exercise's category for now
     const firstEx = exercises[0];
     if (firstEx && firstEx.categoryId) {
-      const habits = await repositories.habits.getByCategoryId(firstEx.categoryId);
-      const workoutHabit = habits.find(h => h.active);
-      
-      await repositories.activityLogs.create({
+      await logActivity({
         categoryId: firstEx.categoryId,
-        habitId: workoutHabit?.id || null,
         type: 'exercise',
         value: 1, // 1 routine
         unit: 'routine',
         metadata: JSON.stringify({ routineName: routine.name }),
         timestamp: end,
-        logicalDate: getLogicalDate(end, 4),
+        fallbackName: `Workout (${routine.name})`
       });
     }
 

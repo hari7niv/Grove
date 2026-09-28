@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Dimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme, type Theme } from '@/src/design/theme';
 import { spacing, maxContentWidth } from '@/src/design/tokens';
 import { useGardenStore } from '@/src/stores/garden';
+import { useRepositories } from '@/src/db/provider';
 import { Plant } from '@/src/components/garden/Plant';
 import { ChevronLeftIcon, FireIcon, TrophyIcon, ShieldIcon } from '@/src/components/ui/Icon';
 import { getLogicalDate, nowISO, addDays, getMonthKey } from '@/src/utils/date';
@@ -19,12 +20,20 @@ export default function PlantDetailsScreen() {
   const { plants } = useGardenStore();
   const plant = plants.find(p => p.habit.id === id);
 
-  // Fallback day start hour if settings are missing
-  const today = getLogicalDate(nowISO(), 4);
+  const [today, setToday] = useState<string>('');
+  const repositories = useRepositories();
 
+  useEffect(() => {
+    async function load() {
+      const settings = await repositories.settings.getAll();
+      const dayStartHour = settings.dayStartHour;
+      setToday(getLogicalDate(nowISO(), dayStartHour));
+    }
+    load();
+  }, [repositories]);
   // Generate 90 days for the heatmap
   const heatmapData = useMemo(() => {
-    if (!plant) return [];
+    if (!plant || !today) return [];
     const days = [];
     const map = new Map(plant.activities.map(a => [a.date, a]));
     for (let i = 89; i >= 0; i--) {

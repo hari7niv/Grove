@@ -13,7 +13,8 @@ import { spacing } from '@/src/design/tokens';
 import { useRepositories } from '@/src/db/provider';
 import { ChevronLeftIcon, PlayIcon, PauseIcon, CheckIcon, SettingsIcon } from '@/src/components/ui/Icon';
 import type { Exercise } from '@/src/types/models';
-import { nowISO, getLogicalDate } from '@/src/utils/date';
+import { nowISO } from '@/src/utils/date';
+import { useActivityLogger } from '@/src/hooks/useActivityLogger';
 
 export default function ExerciseSessionScreen() {
   const { id } = useLocalSearchParams();
@@ -22,6 +23,7 @@ export default function ExerciseSessionScreen() {
   const insets = useSafeAreaInsets();
   const styles = makeStyles(theme);
   const repositories = useRepositories();
+  const { logActivity } = useActivityLogger();
 
   const [exercise, setExercise] = useState<Exercise | null>(null);
   
@@ -109,21 +111,16 @@ export default function ExerciseSessionScreen() {
 
     // 2. Save ActivityLog to water the garden!
     if (exercise.categoryId) {
-      // Find habit related to this category for exercise
-      const habits = await repositories.habits.getByCategoryId(exercise.categoryId);
-      const workoutHabit = habits.find(h => h.active);
-      
       const value = exercise.mode === 'count' ? repsCompleted.reduce((a, b) => a + b, 0) : 1;
       
-      await repositories.activityLogs.create({
+      await logActivity({
         categoryId: exercise.categoryId,
-        habitId: workoutHabit?.id || null,
         type: 'exercise',
         value: value,
         unit: exercise.mode === 'count' ? 'reps' : 'session',
         metadata: JSON.stringify({ exerciseName: exercise.name }),
         timestamp: end,
-        logicalDate: getLogicalDate(end, 4), // hardcoded dayStartHour for now
+        fallbackName: `Workout (${exercise.name})`
       });
     }
 

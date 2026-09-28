@@ -12,7 +12,7 @@ import { spacing } from '@/src/design/tokens';
 import { useRepositories } from '@/src/db/provider';
 import { ChevronLeftIcon, CheckIcon } from '@/src/components/ui/Icon';
 import type { Roadmap, RoadmapItem } from '@/src/types/models';
-import { getToday, nowISO } from '@/src/utils/date';
+import { useActivityLogger } from '@/src/hooks/useActivityLogger';
 
 export default function RoadmapScreen() {
   const { id } = useLocalSearchParams();
@@ -21,6 +21,7 @@ export default function RoadmapScreen() {
   const insets = useSafeAreaInsets();
   const styles = makeStyles(theme);
   const repositories = useRepositories();
+  const { logActivity } = useActivityLogger();
 
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
   const [items, setItems] = useState<RoadmapItem[]>([]);
@@ -53,18 +54,13 @@ export default function RoadmapScreen() {
       
       // If marking as done, log activity
       if (newStatus && roadmap.categoryId) {
-        const habits = await repositories.habits.getByCategoryId(roadmap.categoryId);
-        const learningHabit = habits.find(h => h.active);
-        
-        await repositories.activityLogs.create({
+        await logActivity({
           categoryId: roadmap.categoryId,
-          habitId: learningHabit?.id || null,
           type: 'roadmap',
           value: 1, // 1 topic completed
           unit: 'topic',
           metadata: JSON.stringify({ topic: topic.title, roadmapName: roadmap.name }),
-          timestamp: nowISO(),
-          logicalDate: getToday(4),
+          fallbackName: `Learning (${roadmap.name})`
         });
       }
     } catch (e) {

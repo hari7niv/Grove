@@ -15,8 +15,6 @@ import { useRepositories } from '@/src/db/provider';
 import { getLogicalDate, nowISO } from '@/src/utils/date';
 import { useRouter } from 'expo-router';
 
-// Hardcoded for now until we build the settings UI
-const SETTINGS_DAY_START_HOUR = 4; 
 
 export default function GardenScreen() {
   const theme = useTheme();
@@ -27,9 +25,11 @@ export default function GardenScreen() {
   const repositories = useRepositories();
   const { plants, isLoading, sync } = useGardenStore();
 
-  const handleRefresh = () => {
-    const logicalToday = getLogicalDate(nowISO(), SETTINGS_DAY_START_HOUR);
-    sync(repositories, logicalToday);
+  const handleRefresh = async () => {
+    const settings = await repositories.settings.getAll();
+    const dayStartHour = settings.dayStartHour;
+    const logicalToday = getLogicalDate(nowISO(), dayStartHour);
+    await sync(repositories, logicalToday);
   };
 
   // Sync on mount

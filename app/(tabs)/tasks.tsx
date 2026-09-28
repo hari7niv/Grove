@@ -13,6 +13,7 @@ import { TasksIcon, PlusIcon, CheckIcon } from '@/src/components/ui/Icon';
 import { useRepositories } from '@/src/db/provider';
 import type { Task } from '@/src/types/models';
 import { getToday } from '@/src/utils/date';
+import { useActivityLogger } from '@/src/hooks/useActivityLogger';
 
 export default function TasksScreen() {
   const theme = useTheme();
@@ -21,14 +22,21 @@ export default function TasksScreen() {
   const styles = makeStyles(theme);
   
   const repositories = useRepositories();
+  const { logActivity } = useActivityLogger();
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [todayStr, setTodayStr] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
 
   const loadTasks = async () => {
     setIsLoading(true);
     try {
-      const data = await repositories.tasks.getPending();
+      const [data, settings] = await Promise.all([
+        repositories.tasks.getPending(),
+        repositories.settings.getAll()
+      ]);
       setTasks(data);
+      const dayStartHour = settings.dayStartHour;
+      setTodayStr(getToday(dayStartHour));
     } catch (e) {
       console.error(e);
     } finally {
@@ -49,18 +57,14 @@ export default function TasksScreen() {
       
       // If task has a category, water that category's plant
       if (task.categoryId) {
-        const habits = await repositories.habits.getByCategoryId(task.categoryId);
-        const taskHabit = habits.find(h => h.active);
-        
-        await repositories.activityLogs.create({
+        await logActivity({
           categoryId: task.categoryId,
-          habitId: taskHabit?.id || null,
           type: 'task',
           value: 1,
           unit: 'task',
           metadata: JSON.stringify({ taskTitle: task.title }),
           timestamp: new Date().toISOString(),
-          logicalDate: getToday(4), // using default dayStartHour
+          fallbackName: `Tasks`
         });
       }
       
@@ -71,7 +75,7 @@ export default function TasksScreen() {
     }
   };
 
-  const todayStr = getToday(4);
+
 
   const overdue = tasks.filter(t => t.dueDate && t.dueDate < todayStr);
   const today = tasks.filter(t => t.dueDate === todayStr);

@@ -34,8 +34,11 @@ export default function InsightsScreen() {
       const start = new Date();
       start.setDate(start.getDate() - 7);
       
-      const endDate = getLogicalDate(end.toISOString(), 4);
-      const startDate = getLogicalDate(start.toISOString(), 4);
+      const settings = await repositories.settings.getAll();
+      const dayStartHour = settings.dayStartHour;
+
+      const endDate = getLogicalDate(end.toISOString(), dayStartHour);
+      const startDate = getLogicalDate(start.toISOString(), dayStartHour);
 
       const logs = await repositories.activityLogs.getByDateRange(startDate, endDate);
       setRecentLogs(logs);

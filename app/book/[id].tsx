@@ -12,7 +12,7 @@ import { spacing } from '@/src/design/tokens';
 import { useRepositories } from '@/src/db/provider';
 import { ChevronLeftIcon, CheckIcon, PlusIcon } from '@/src/components/ui/Icon';
 import type { Book, BookQuote } from '@/src/types/models';
-import { getToday, nowISO } from '@/src/utils/date';
+import { useActivityLogger } from '@/src/hooks/useActivityLogger';
 
 export default function BookScreen() {
   const { id } = useLocalSearchParams();
@@ -22,6 +22,7 @@ export default function BookScreen() {
   const insets = useSafeAreaInsets();
   const styles = makeStyles(theme);
   const repositories = useRepositories();
+  const { logActivity } = useActivityLogger();
 
   const [book, setBook] = useState<Book | null>(null);
   const [quotes, setQuotes] = useState<BookQuote[]>([]);
@@ -79,7 +80,7 @@ export default function BookScreen() {
         notes: null,
         rating: null,
         startDate: null,
-        finishDate: isFinished ? nowISO() : null,
+        finishDate: isFinished ? new Date().toISOString() : null,
         coverColor: null,
       };
 
@@ -95,21 +96,14 @@ export default function BookScreen() {
         
         // Water reading plant if pages were read
         if (pagesRead > 0) {
-          const mindHabits = await repositories.habits.getActive();
-          const readingHabit = mindHabits.find(h => h.name.toLowerCase().includes('read'));
-          
-          if (readingHabit) {
-            await repositories.activityLogs.create({
-              categoryId: readingHabit.categoryId,
-              habitId: readingHabit.id,
-              type: 'reading',
-              value: pagesRead,
-              unit: 'pages',
-              metadata: JSON.stringify({ bookTitle: payload.title }),
-              timestamp: nowISO(),
-              logicalDate: getToday(4),
-            });
-          }
+          await logActivity({
+            type: 'reading',
+            value: pagesRead,
+            unit: 'pages',
+            metadata: JSON.stringify({ bookTitle: payload.title }),
+            timestamp: new Date().toISOString(),
+            fallbackName: `Reading (${payload.title})`
+          });
         }
         router.back();
       }

@@ -26,7 +26,7 @@ export default function TaskScreen() {
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [dueDate, setDueDate] = useState(getToday(4));
+  const [dueDate, setDueDate] = useState('');
   const [dueTime, setDueTime] = useState('');
   const [priority, setPriority] = useState<TaskPriority>('medium');
   const [categoryId, setCategoryId] = useState<string | null>(null);
@@ -37,6 +37,9 @@ export default function TaskScreen() {
     async function load() {
       const cats = await repositories.categories.getAll();
       setCategories(cats);
+      
+      const settings = await repositories.settings.getAll();
+      const dayStartHour = settings.dayStartHour;
 
       if (!isNew && typeof id === 'string') {
         const task = await repositories.tasks.getById(id);
@@ -48,6 +51,8 @@ export default function TaskScreen() {
           setPriority(task.priority);
           setCategoryId(task.categoryId);
         }
+      } else if (isNew) {
+        setDueDate(getToday(dayStartHour));
       }
     }
     load();

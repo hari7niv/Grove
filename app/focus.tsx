@@ -12,7 +12,8 @@ import { spacing } from '@/src/design/tokens';
 import { useRepositories } from '@/src/db/provider';
 import { ChevronLeftIcon, PlayIcon, PauseIcon, CheckIcon, XIcon, ClockIcon } from '@/src/components/ui/Icon';
 import type { Category, FocusMode } from '@/src/types/models';
-import { nowISO, getToday } from '@/src/utils/date';
+import { nowISO } from '@/src/utils/date';
+import { useActivityLogger } from '@/src/hooks/useActivityLogger';
 
 export default function FocusScreen() {
   const router = useRouter();
@@ -20,6 +21,7 @@ export default function FocusScreen() {
   const insets = useSafeAreaInsets();
   const styles = makeStyles(theme);
   const repositories = useRepositories();
+  const { logActivity } = useActivityLogger();
 
   // Setup state
   const [categories, setCategories] = useState<Category[]>([]);
@@ -107,19 +109,14 @@ export default function FocusScreen() {
         notes: notes.trim() || null,
       });
 
-      // Water the garden for this category
-      const habits = await repositories.habits.getByCategoryId(categoryId);
-      const focusHabit = habits.find(h => h.active);
-
-      await repositories.activityLogs.create({
+      await logActivity({
         categoryId,
-        habitId: focusHabit?.id || null,
         type: 'focus',
         value: actualDuration / 60, // save in minutes
         unit: 'minutes',
         metadata: JSON.stringify({ qualityRating }),
         timestamp: end,
-        logicalDate: getToday(4),
+        fallbackName: `Focus`
       });
 
       router.back();
