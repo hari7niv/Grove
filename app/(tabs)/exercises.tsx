@@ -12,7 +12,7 @@ import { useTheme, type Theme } from '@/src/design/theme';
 import { spacing, maxContentWidth } from '@/src/design/tokens';
 import { FitnessIcon, ClockIcon, TargetIcon, PlayIcon } from '@/src/components/ui/Icon';
 import { useRepositories } from '@/src/db/provider';
-import type { Exercise, Routine } from '@/src/types/models';
+import type { Exercise, Routine, ExerciseSession } from '@/src/types/models';
 
 export default function ExercisesScreen() {
   const theme = useTheme();
@@ -23,18 +23,21 @@ export default function ExercisesScreen() {
   const repositories = useRepositories();
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [routines, setRoutines] = useState<Routine[]>([]);
+  const [sessions, setSessions] = useState<ExerciseSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'exercises' | 'routines'>('exercises');
+  const [activeTab, setActiveTab] = useState<'exercises' | 'routines' | 'history'>('exercises');
 
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const [exs, rts] = await Promise.all([
+      const [exs, rts, sess] = await Promise.all([
         repositories.exercises.getAll(),
-        repositories.routines.getAll()
+        repositories.routines.getAll(),
+        repositories.exerciseSessions.getAll()
       ]);
       setExercises(exs);
       setRoutines(rts);
+      setSessions(sess);
     } catch (e) {
       console.error(e);
     } finally {
@@ -60,11 +63,12 @@ export default function ExercisesScreen() {
           <Text style={styles.subtitle}>Track workouts and routines.</Text>
         </View>
         <Pressable 
-          style={styles.addButton}
+          style={[styles.addButton, activeTab === 'history' && { opacity: 0 }]}
+          disabled={activeTab === 'history'}
           onPress={() => {
             if (activeTab === 'routines') {
               router.push('/routine/new' as any);
-            } else {
+            } else if (activeTab === 'exercises') {
               router.push('/exercise/new' as any);
             }
           }}
@@ -85,6 +89,12 @@ export default function ExercisesScreen() {
           onPress={() => setActiveTab('routines')}
         >
           <Text style={[styles.tabText, activeTab === 'routines' && styles.tabTextActive]}>Routines</Text>
+        </Pressable>
+        <Pressable 
+          style={[styles.tab, activeTab === 'history' && styles.tabActive]}
+          onPress={() => setActiveTab('history')}
+        >
+          <Text style={[styles.tabText, activeTab === 'history' && styles.tabTextActive]}>History</Text>
         </Pressable>
       </View>
 
@@ -126,7 +136,7 @@ export default function ExercisesScreen() {
             ))}
           </View>
         )
-      ) : (
+      ) : activeTab === 'routines' ? (
         routines.length === 0 && !isLoading ? (
           <View style={styles.emptyState}>
             <View style={styles.iconWrap}>
@@ -156,6 +166,50 @@ export default function ExercisesScreen() {
                 </View>
               </Pressable>
             ))}
+          </View>
+        )
+      ) : (
+        sessions.length === 0 && !isLoading ? (
+          <View style={styles.emptyState}>
+            <View style={styles.iconWrap}>
+              <ClockIcon size={48} color={theme.colors.textTertiary} />
+            </View>
+            <Text style={styles.emptyTitle}>No History</Text>
+            <Text style={styles.emptyBody}>
+              Complete an exercise or routine to see it here.
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.list}>
+            {sessions.map((session) => {
+              const ex = exercises.find(e => e.id === session.exerciseId);
+              const rt = routines.find(r => r.id === session.routineId);
+              const dateStr = new Date(session.startedAt).toLocaleDateString(undefined, {
+                month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+              });
+              return (
+                <View key={session.id} style={styles.historyCard}>
+                  <View style={styles.historyHeader}>
+                    <Text style={styles.historyTitle}>{ex?.name || 'Unknown Exercise'}</Text>
+                    <Text style={styles.historyDate}>{dateStr}</Text>
+                  </View>
+                  <Text style={styles.historySubtitle}>
+                    {rt ? `Routine: ${rt.name}` : 'Solo Exercise'}
+                  </Text>
+                  <View style={styles.historyStats}>
+                    {session.duration !== null && (
+                      <Text style={styles.historyStatText}>{session.duration}s duration</Text>
+                    )}
+                    {session.setsCompleted !== null && (
+                      <Text style={styles.historyStatText}>{session.setsCompleted} sets</Text>
+                    )}
+                    {session.repsCompleted !== null && (
+                      <Text style={styles.historyStatText}>{session.repsCompleted} reps</Text>
+                    )}
+                  </View>
+                </View>
+              );
+            })}
           </View>
         )
       )}
@@ -282,6 +336,49 @@ function makeStyles(theme: Theme) {
       color: theme.colors.textSecondary,
       textAlign: 'center',
       maxWidth: 300,
+    },
+    historyCard: {
+      backgroundColor: theme.colors.surface,
+      padding: spacing.lg,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    historyHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.xs,
+    },
+    historyTitle: {
+      fontFamily: 'Inter_600SemiBold',
+      fontSize: 16,
+      color: theme.colors.textPrimary,
+    },
+    historyDate: {
+      fontFamily: 'Inter_400Regular',
+      fontSize: 13,
+      color: theme.colors.textTertiary,
+    },
+    historySubtitle: {
+      fontFamily: 'Inter_400Regular',
+      fontSize: 13,
+      color: theme.colors.textSecondary,
+      marginBottom: spacing.md,
+    },
+    historyStats: {
+      flexDirection: 'row',
+      gap: spacing.md,
+    },
+    historyStatText: {
+      fontFamily: 'Inter_500Medium',
+      fontSize: 13,
+      color: theme.colors.accent,
+      backgroundColor: theme.colors.accentLight,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 2,
+      borderRadius: 6,
+      overflow: 'hidden',
     },
   });
 }

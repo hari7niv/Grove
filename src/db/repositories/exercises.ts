@@ -154,6 +154,13 @@ export function createExerciseSessionRepository(
   db: SQLiteDatabase,
 ): ExerciseSessionRepository {
   return {
+    async getAll() {
+      const rows = await db.getAllAsync<ExerciseSessionRow>(
+        'SELECT * FROM exercise_session ORDER BY started_at DESC'
+      );
+      return rows.map(mapExerciseSessionRow);
+    },
+
     async getByExerciseId(exerciseId) {
       const rows = await db.getAllAsync<ExerciseSessionRow>(
         'SELECT * FROM exercise_session WHERE exercise_id = ? ORDER BY started_at DESC',

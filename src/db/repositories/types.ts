@@ -95,6 +95,7 @@ export interface RoutineRepository {
 }
 
 export interface ExerciseSessionRepository {
+  getAll(): Promise<ExerciseSession[]>;
   getByExerciseId(exerciseId: string): Promise<ExerciseSession[]>;
   getByRoutineId(routineId: string): Promise<ExerciseSession[]>;
   create(session: Omit<ExerciseSession, 'id' | 'createdAt'>): Promise<ExerciseSession>;
