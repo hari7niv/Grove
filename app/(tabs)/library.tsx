@@ -3,7 +3,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Pressable, RefreshControl, TextInput, Dimensions, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 
@@ -14,6 +14,9 @@ import { useRepositories } from '@/src/db/provider';
 import type { Book, Roadmap } from '@/src/types/models';
 
 type Tab = 'books' | 'roadmaps';
+type BookStatusFilter = 'all' | 'want_to_read' | 'reading' | 'finished';
+
+const { width } = Dimensions.get('window');
 
 export default function LibraryScreen() {
   const theme = useTheme();
@@ -26,6 +29,10 @@ export default function LibraryScreen() {
   const [books, setBooks] = useState<Book[]>([]);
   const [roadmaps, setRoadmaps] = useState<Roadmap[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Search & Filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<BookStatusFilter>('all');
 
   const loadData = async () => {
     setIsLoading(true);
@@ -63,14 +70,13 @@ export default function LibraryScreen() {
 
   const renderBook = (book: Book) => (
     <Pressable 
-      key={book.id} 
-      style={[styles.card, { marginBottom: spacing.lg }]}
+      style={styles.bookCard}
       onPress={() => router.push(`/book/${book.id}` as any)}
     >
-      <View style={[styles.bookCover, { backgroundColor: book.coverColor || theme.colors.surfaceRaised }]} />
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{book.title}</Text>
-        {book.author && <Text style={styles.cardSubtitle}>{book.author}</Text>}
+      <View style={[styles.bookCoverGrid, { backgroundColor: book.coverColor || theme.colors.surfaceRaised }]} />
+      <View style={styles.bookCardContent}>
+        <Text style={styles.bookCardTitle} numberOfLines={2}>{book.title}</Text>
+        {book.author && <Text style={styles.bookCardSubtitle} numberOfLines={1}>{book.author}</Text>}
         <Text style={styles.statusText}>
           {book.status === 'reading' ? `Page ${book.currentPage}` : 
            book.status === 'finished' ? 'Finished' : 'Want to read'}
@@ -81,19 +87,18 @@ export default function LibraryScreen() {
 
   const renderRoadmap = (rm: Roadmap) => (
     <Pressable 
-      key={rm.id} 
-      style={[styles.card, { marginBottom: spacing.lg }]}
+      style={styles.roadmapCard}
       onPress={() => router.push(`/roadmap/${rm.id}` as any)}
     >
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{rm.name}</Text>
-        {rm.description && <Text style={styles.cardSubtitle}>{rm.description}</Text>}
+      <View style={styles.roadmapCardContent}>
+        <Text style={styles.roadmapCardTitle}>{rm.name}</Text>
+        {rm.description && <Text style={styles.roadmapCardSubtitle}>{rm.description}</Text>}
       </View>
     </Pressable>
   );
 
   const renderBooksEmpty = () => {
-    if (books.length > 0 || isLoading) return null;
+    if (isLoading) return null;
     return (
       <View style={styles.emptyState}>
         <View style={styles.iconWrap}>
@@ -101,7 +106,7 @@ export default function LibraryScreen() {
         </View>
         <Text style={styles.emptyTitle}>Empty Shelf</Text>
         <Text style={styles.emptyBody}>
-          Add books you're reading or want to read.
+          No books found. Try adjusting your search or add a new book.
         </Text>
       </View>
     );
@@ -122,8 +127,20 @@ export default function LibraryScreen() {
     );
   };
 
+  const renderFilterChip = (label: string, value: BookStatusFilter) => {
+    const isActive = statusFilter === value;
+    return (
+      <Pressable
+        style={[styles.filterChip, isActive && styles.filterChipActive]}
+        onPress={() => setStatusFilter(value)}
+      >
+        <Text style={[styles.filterChipText, isActive && styles.filterChipTextActive]}>{label}</Text>
+      </Pressable>
+    );
+  };
+
   const renderHeader = () => (
-    <>
+    <View style={{ marginBottom: spacing.lg }}>
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>Library</Text>
@@ -143,20 +160,51 @@ export default function LibraryScreen() {
         {renderTab('books', 'Books')}
         {renderTab('roadmaps', 'Roadmaps')}
       </View>
-      {activeTab === 'books' ? renderBooksEmpty() : renderRoadmapsEmpty()}
-    </>
+
+      {activeTab === 'books' && (
+        <View style={styles.searchSection}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search by title or author..."
+            placeholderTextColor={theme.colors.textTertiary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
+            {renderFilterChip('All', 'all')}
+            {renderFilterChip('Reading', 'reading')}
+            {renderFilterChip('Want to Read', 'want_to_read')}
+            {renderFilterChip('Finished', 'finished')}
+          </ScrollView>
+        </View>
+      )}
+    </View>
   );
+
+  // Filter Data
+  const filteredBooks = books.filter(b => {
+    const matchesSearch = b.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          (b.author || '').toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || b.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const data = activeTab === 'books' ? filteredBooks : roadmaps;
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <FlatList
-        data={(activeTab === 'books' ? books : roadmaps) as any[]}
+        key={activeTab} // Force re-render when switching tabs to allow changing numColumns
+        data={data as any[]}
         keyExtractor={(item: any) => item.id}
         renderItem={({ item }: { item: any }) => activeTab === 'books' ? renderBook(item as Book) : renderRoadmap(item as Roadmap)}
         contentContainerStyle={styles.content}
+        numColumns={activeTab === 'books' ? 2 : 1}
+        columnWrapperStyle={activeTab === 'books' ? styles.columnWrapper : undefined}
         ListHeaderComponent={renderHeader}
+        ListEmptyComponent={activeTab === 'books' ? renderBooksEmpty() : renderRoadmapsEmpty()}
         refreshControl={
-          <RefreshControl refreshing={isLoading && (books.length > 0 || roadmaps.length > 0)} onRefresh={loadData} tintColor={theme.colors.accent} />
+          <RefreshControl refreshing={isLoading && data.length > 0} onRefresh={loadData} tintColor={theme.colors.accent} />
         }
       />
     </View>
@@ -195,7 +243,7 @@ function makeStyles(theme: Theme) {
       backgroundColor: theme.colors.surfaceRaised,
       padding: 4,
       borderRadius: 12,
-      marginBottom: spacing['2xl'],
+      marginBottom: spacing['xl'],
     },
     tab: {
       flex: 1,
@@ -220,6 +268,45 @@ function makeStyles(theme: Theme) {
       color: theme.colors.textPrimary,
       fontFamily: 'Inter_600SemiBold',
     },
+    searchSection: {
+      marginBottom: spacing.lg,
+    },
+    searchInput: {
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: 12,
+      padding: spacing.md,
+      fontFamily: 'Inter_400Regular',
+      fontSize: 16,
+      color: theme.colors.textPrimary,
+      marginBottom: spacing.md,
+    },
+    filterScroll: {
+      flexDirection: 'row',
+    },
+    filterChip: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.xs,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      marginRight: spacing.sm,
+      backgroundColor: theme.colors.surface,
+    },
+    filterChipActive: {
+      backgroundColor: theme.colors.accentLight,
+      borderColor: theme.colors.accent,
+    },
+    filterChipText: {
+      fontFamily: 'Inter_500Medium',
+      fontSize: 14,
+      color: theme.colors.textSecondary,
+    },
+    filterChipTextActive: {
+      color: theme.colors.accent,
+      fontFamily: 'Inter_600SemiBold',
+    },
     emptyState: { alignItems: 'center', paddingVertical: spacing['5xl'] },
     iconWrap: {
       width: 80, height: 80, borderRadius: 40,
@@ -234,44 +321,64 @@ function makeStyles(theme: Theme) {
       fontFamily: 'Inter_400Regular', fontSize: 15, lineHeight: 22,
       color: theme.colors.textSecondary, textAlign: 'center', maxWidth: 300,
     },
-    list: {
-      gap: spacing.lg,
+    columnWrapper: {
+      justifyContent: 'space-between',
     },
-    card: {
-      flexDirection: 'row',
+    bookCard: {
+      width: '48%',
+      marginBottom: spacing.lg,
       backgroundColor: theme.colors.surface,
       borderRadius: 12,
-      padding: spacing.md,
       borderWidth: 1,
       borderColor: theme.colors.border,
-      alignItems: 'center',
+      overflow: 'hidden',
     },
-    bookCover: {
-      width: 48,
-      height: 64,
-      borderRadius: 4,
-      marginRight: spacing.md,
+    bookCoverGrid: {
+      width: '100%',
+      aspectRatio: 2/3,
     },
-    cardContent: {
-      flex: 1,
-      justifyContent: 'center',
+    bookCardContent: {
+      padding: spacing.md,
     },
-    cardTitle: {
+    bookCardTitle: {
       fontFamily: 'Inter_600SemiBold',
-      fontSize: 17,
+      fontSize: 14,
       color: theme.colors.textPrimary,
       marginBottom: 2,
     },
-    cardSubtitle: {
+    bookCardSubtitle: {
       fontFamily: 'Inter_400Regular',
-      fontSize: 15,
+      fontSize: 12,
       color: theme.colors.textSecondary,
       marginBottom: 4,
     },
     statusText: {
       fontFamily: 'Inter_500Medium',
-      fontSize: 13,
+      fontSize: 12,
       color: theme.colors.accent,
-    }
+    },
+    roadmapCard: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      padding: spacing.md,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      marginBottom: spacing.lg,
+    },
+    roadmapCardContent: {
+      flex: 1,
+    },
+    roadmapCardTitle: {
+      fontFamily: 'Inter_600SemiBold',
+      fontSize: 17,
+      color: theme.colors.textPrimary,
+      marginBottom: 2,
+    },
+    roadmapCardSubtitle: {
+      fontFamily: 'Inter_400Regular',
+      fontSize: 15,
+      color: theme.colors.textSecondary,
+      marginBottom: 4,
+    },
   });
 }
