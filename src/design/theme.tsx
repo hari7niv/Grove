@@ -3,9 +3,10 @@
  * Provides a React context for the active theme.
  */
 
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import { palette, spacing, radius, typeScale, elevation, motion } from './tokens';
+import { useRepositories } from '../db/provider';
 
 export interface ThemeColors {
   background: string;
@@ -121,14 +122,54 @@ interface ThemeProviderProps {
   children: React.ReactNode;
 }
 
-export function ThemeProvider({ override = 'system', children }: ThemeProviderProps) {
+export function ThemeProvider({ override, children }: ThemeProviderProps) {
   const systemScheme = useColorScheme();
+  const repositories = useRepositories();
+  const [pref, setPref] = useState<'system' | 'light' | 'dark'>(override || 'system');
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  useEffect(() => {
+    if (override) {
+      setPref(override);
+      return;
+    }
+    const loadSettings = async () => {
+      try {
+        const settings = await repositories.settings.getAll();
+        setPref(settings.themePreference || 'system');
+        setReduceMotion(settings.reduceMotion || false);
+      } catch (e) {
+        // use defaults if db fails
+      }
+    };
+    loadSettings();
+    // In a real app we might want to subscribe to settings changes.
+  }, [override, repositories]);
 
   const theme = useMemo(() => {
-    if (override === 'light') return lightTheme;
-    if (override === 'dark') return darkTheme;
-    return systemScheme === 'dark' ? darkTheme : lightTheme;
-  }, [override, systemScheme]);
+    let isDark = false;
+    if (pref === 'light') isDark = false;
+    else if (pref === 'dark') isDark = true;
+    else isDark = systemScheme === 'dark';
+
+    const baseTheme = isDark ? darkTheme : lightTheme;
+    
+    // Apply reduceMotion override to motion config if needed
+    if (reduceMotion) {
+      return {
+        ...baseTheme,
+        motion: {
+          ...baseTheme.motion,
+          duration: {
+            short: 0,
+            medium: 0,
+            long: 0,
+          }
+        }
+      };
+    }
+    return baseTheme;
+  }, [pref, systemScheme, reduceMotion]);
 
   return (
     <ThemeContext.Provider value={theme}>

@@ -111,10 +111,11 @@ export async function getDatabase(): Promise<SQLiteDatabase> {
     return new WebSQLiteWrapper() as unknown as SQLiteDatabase;
   }
   
+  // Use metro asset resolution for the WASM file
+  const wasmUrl = require('sql.js/dist/sql-wasm.wasm');
+  
   const SQL = await initSqlJs({
-    // We expect sql-wasm.wasm to be served from the root or node_modules
-    // Usually bundlers can resolve this or we can fetch it from unpkg
-    locateFile: file => `https://sql.js.org/dist/${file}`
+    locateFile: () => typeof wasmUrl === 'string' ? wasmUrl : wasmUrl.uri || wasmUrl
   });
   
   const savedData = await idb.get<Uint8Array>(DB_KEY);

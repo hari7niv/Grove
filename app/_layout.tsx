@@ -48,11 +48,11 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider>
-      <DatabaseProvider>
+    <DatabaseProvider>
+      <ThemeProvider>
         <RootLayoutNav />
-      </DatabaseProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </DatabaseProvider>
   );
 }
 
