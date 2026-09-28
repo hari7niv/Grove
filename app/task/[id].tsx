@@ -60,21 +60,20 @@ export default function TaskScreen() {
     }
 
     try {
-      const payload = {
-        title: title.trim(),
-        description: description.trim() || null,
-        dueDate: dueDate.trim() || null,
-        dueTime: dueTime.trim() || null,
-        priority,
-        status: 'pending' as const,
-        categoryId,
-        parentId: null,
-        tags: [],
-        recurrenceRule: null,
-        completedAt: null,
-      };
-
       if (isNew) {
+        const payload = {
+          title: title.trim(),
+          description: description.trim() || null,
+          dueDate: dueDate.trim() || null,
+          dueTime: dueTime.trim() || null,
+          priority,
+          status: 'pending' as const,
+          categoryId,
+          parentId: null,
+          tags: [],
+          recurrenceRule: null,
+          completedAt: null,
+        };
         const newTask = await repositories.tasks.create(payload);
         if (dueDate.trim() && dueTime.trim()) {
           const notificationId = await scheduleTaskReminder(
@@ -97,6 +96,14 @@ export default function TaskScreen() {
           }
         }
       } else if (typeof id === 'string') {
+        const payload = {
+          title: title.trim(),
+          description: description.trim() || null,
+          dueDate: dueDate.trim() || null,
+          dueTime: dueTime.trim() || null,
+          priority,
+          categoryId,
+        };
         const updatedTask = await repositories.tasks.update(id, payload);
         if (updatedTask) {
           const existingReminders = await repositories.reminders.getByTargetId(id);
@@ -135,6 +142,13 @@ export default function TaskScreen() {
       console.error(e);
       alert('Failed to save task');
     }
+  };
+
+  const handleDelete = () => {
+    if (typeof id !== 'string') return;
+    repositories.tasks.delete(id).then(() => {
+      router.back();
+    }).catch(console.error);
   };
 
   const renderPriority = (p: TaskPriority, label: string) => (
@@ -249,8 +263,13 @@ export default function TaskScreen() {
 
       <View style={[styles.footer, { paddingBottom: insets.bottom || spacing.xl }]}>
         <Pressable style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Save Task</Text>
+          <Text style={styles.saveButtonText}>{isNew ? 'Create Task' : 'Save Changes'}</Text>
         </Pressable>
+        {!isNew && (
+          <Pressable style={styles.deleteButton} onPress={handleDelete}>
+            <Text style={styles.deleteButtonText}>Delete Task</Text>
+          </Pressable>
+        )}
       </View>
     </View>
   );
@@ -335,5 +354,14 @@ function makeStyles(theme: Theme) {
       alignItems: 'center',
     },
     saveButtonText: { fontFamily: 'Inter_600SemiBold', fontSize: 17, color: '#FFF' },
+    deleteButton: {
+      marginTop: spacing.md,
+      paddingVertical: spacing.lg,
+      borderRadius: 16,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.colors.error,
+    },
+    deleteButtonText: { fontFamily: 'Inter_600SemiBold', fontSize: 17, color: theme.colors.error },
   });
 }
