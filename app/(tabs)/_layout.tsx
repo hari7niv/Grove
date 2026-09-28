@@ -5,10 +5,11 @@
  * Desktop: persistent left sidebar
  */
 
-import React from 'react';
-import { Tabs } from 'expo-router';
+import React, { useEffect } from 'react';
+import { Tabs, useRouter } from 'expo-router';
 import { View, Text, StyleSheet, Pressable, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRepositories } from '@/src/db/provider';
 
 import { useTheme } from '@/src/design/theme';
 import { useLayout } from '@/src/hooks/useLayout';
@@ -36,6 +37,19 @@ const TAB_ITEMS = [
 export default function TabLayout() {
   const theme = useTheme();
   const layout = useLayout();
+  const repositories = useRepositories();
+  const router = useRouter();
+
+  useEffect(() => {
+    async function checkOnboarding() {
+      const cats = await repositories.categories.getAll();
+      if (cats.length === 0) {
+        // Empty DB (no categories), redirect to onboarding
+        router.replace('/onboarding' as any);
+      }
+    }
+    checkOnboarding();
+  }, [repositories, router]);
 
   return (
     <Tabs

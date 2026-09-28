@@ -58,17 +58,19 @@ describe('Repository Integration Tests', () => {
 
   describe('Activity Logs', () => {
     it('creates and fetches logs by date range', async () => {
-      const cats = await repos.categories.getAll();
-      const habits = await repos.habits.getAll();
-      const catId = cats[0].id;
-      const habitId = habits[0].id;
+      const cat = await repos.categories.create({
+        name: 'Test Cat', color: '#000', icon: 'test', plantType: 'oak', sortOrder: 0
+      });
+      const habit = await repos.habits.create({
+        categoryId: cat.id, name: 'Test Habit', requirementType: 'any', requirementValue: 1, active: true
+      });
 
       await repos.activityLogs.create({
         logicalDate: '2026-09-28',
         timestamp: nowISO(),
         type: 'task',
-        categoryId: catId,
-        habitId: habitId,
+        categoryId: cat.id,
+        habitId: habit.id,
         value: 1,
         unit: null,
         metadata: null,

@@ -234,22 +234,6 @@ export const MIGRATIONS: Migration[] = [
         value TEXT NOT NULL
       )`,
 
-      // Seed default categories
-      `INSERT OR IGNORE INTO category (id, name, color, icon, plant_type, sort_order, created_at, updated_at) VALUES
-        ('cat_fitness', 'Fitness', '#C45B3E', 'fitness', 'oak', 0, datetime('now'), datetime('now')),
-        ('cat_reading', 'Reading', '#5B8FB0', 'book', 'willow', 1, datetime('now'), datetime('now')),
-        ('cat_learning', 'Learning', '#8B6DB0', 'brain', 'pine', 2, datetime('now'), datetime('now')),
-        ('cat_focus', 'Focus', '#D4A843', 'target', 'maple', 3, datetime('now'), datetime('now')),
-        ('cat_tasks', 'Tasks', '#2D7A4F', 'check', 'birch', 4, datetime('now'), datetime('now'))`,
-
-      // Seed default habits (one per category)
-      `INSERT OR IGNORE INTO habit (id, category_id, name, requirement_type, requirement_value, active, created_at, updated_at) VALUES
-        ('hab_fitness', 'cat_fitness', 'Daily Exercise', 'any', 1, 1, datetime('now'), datetime('now')),
-        ('hab_reading', 'cat_reading', 'Daily Reading', 'any', 1, 1, datetime('now'), datetime('now')),
-        ('hab_learning', 'cat_learning', 'Daily Learning', 'any', 1, 1, datetime('now'), datetime('now')),
-        ('hab_focus', 'cat_focus', 'Daily Focus', 'any', 1, 1, datetime('now'), datetime('now')),
-        ('hab_tasks', 'cat_tasks', 'Complete Tasks', 'any', 1, 1, datetime('now'), datetime('now'))`,
-
       // Seed default settings
       `INSERT OR IGNORE INTO settings (key, value) VALUES
         ('dayStartHour', '4'),
