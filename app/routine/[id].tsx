@@ -29,7 +29,7 @@ export default function RoutineRunnerScreen() {
   
   // Exercise tracking state
   const [startedAt, setStartedAt] = useState<string | null>(null);
-  const [routineStartedAt, setRoutineStartedAt] = useState<string | null>(null);
+
   
   // Timer state
   const [isActive, setIsActive] = useState(false);
@@ -39,25 +39,6 @@ export default function RoutineRunnerScreen() {
   const [currentSet, setCurrentSet] = useState(1);
   const [repsCompleted, setRepsCompleted] = useState<number[]>([]);
   const [currentRepsInput, setCurrentRepsInput] = useState('');
-
-  useEffect(() => {
-    async function load() {
-      if (!id || typeof id !== 'string') return;
-      const r = await repositories.routines.getById(id);
-      if (r) {
-        setRoutine(r);
-        const exPromises = r.exerciseIds.map(eid => repositories.exercises.getById(eid));
-        const exs = (await Promise.all(exPromises)).filter(Boolean) as Exercise[];
-        setExercises(exs);
-        setRoutineStartedAt(nowISO());
-        
-        if (exs.length > 0) {
-          setupExercise(exs[0]);
-        }
-      }
-    }
-    load();
-  }, [id, repositories]);
 
   const setupExercise = (ex: Exercise) => {
     setStartedAt(null);
@@ -70,6 +51,25 @@ export default function RoutineRunnerScreen() {
       setCurrentRepsInput('');
     }
   };
+
+  useEffect(() => {
+    async function load() {
+      if (!id || typeof id !== 'string') return;
+      const r = await repositories.routines.getById(id);
+      if (r) {
+        setRoutine(r);
+        const exPromises = r.exerciseIds.map(eid => repositories.exercises.getById(eid));
+        const exs = (await Promise.all(exPromises)).filter(Boolean) as Exercise[];
+        setExercises(exs);
+
+        
+        if (exs.length > 0) {
+          setupExercise(exs[0]);
+        }
+      }
+    }
+    load();
+  }, [id, repositories]);
 
   const currentExercise = exercises[currentIndex];
 

@@ -18,8 +18,7 @@ import { seedDatabase } from '@/src/utils/seed';
 export default function HomeScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const { ready, error } = useDatabase();
-  const repositories = ready ? useRepositories() : null;
+  const { ready, error, repositories } = useDatabase();
   const styles = makeStyles(theme);
 
   return (
