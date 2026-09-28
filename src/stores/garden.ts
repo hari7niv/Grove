@@ -63,13 +63,25 @@ export const useGardenStore = create<GardenState>((set) => ({
 
         const habitLogs = logsByHabit.get(habit.id) || [];
         
-        // Convert ActivityLog[] to DayActivity[] for the streak engine
-        const dayActivities: DayActivity[] = habitLogs.map(log => ({
-          date: log.logicalDate,
-          fulfilled: isDayFulfilled(log.value, habit.requirementType, habit.requirementValue),
-          value: log.value,
-          restTokenUsed: false, // Will read from rest tokens table later
-        }));
+        // Group logs by date and sum their values
+        const logsByDate = new Map<string, number>();
+        for (const log of habitLogs) {
+          const currentVal = logsByDate.get(log.logicalDate) || 0;
+          logsByDate.set(log.logicalDate, currentVal + log.value);
+        }
+
+        const dayActivities: DayActivity[] = Array.from(logsByDate.entries()).map(([date, totalValue]) => {
+          const fulfilled = habit.requirementType === 'count' 
+            ? totalValue >= habit.requirementValue 
+            : true; // 'any' means any log exists
+
+          return {
+            date,
+            fulfilled,
+            value: totalValue,
+            restTokenUsed: false, // Will read from rest tokens table later
+          };
+        });
 
         // Default config for the streak engine
         const config = {
