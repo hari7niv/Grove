@@ -243,6 +243,7 @@ export interface AppSettings {
   notificationsEnabled: boolean;
   reduceMotion: boolean;
   units: 'metric' | 'imperial';
+  targetRole: 'swe' | 'ml_infra';
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -252,4 +253,5 @@ export const DEFAULT_SETTINGS: AppSettings = {
   notificationsEnabled: true,
   reduceMotion: false,
   units: 'metric',
+  targetRole: 'swe',
 };

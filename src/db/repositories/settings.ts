@@ -41,6 +41,7 @@ export function createSettingsRepository(db: SQLiteDatabase): SettingsRepository
         notificationsEnabled: (map.get('notificationsEnabled') ?? String(DEFAULT_SETTINGS.notificationsEnabled)) === 'true',
         reduceMotion: (map.get('reduceMotion') ?? String(DEFAULT_SETTINGS.reduceMotion)) === 'true',
         units: (map.get('units') ?? DEFAULT_SETTINGS.units) as AppSettings['units'],
+        targetRole: (map.get('targetRole') ?? DEFAULT_SETTINGS.targetRole) as AppSettings['targetRole'],
       };
     },
   };
