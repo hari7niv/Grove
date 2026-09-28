@@ -3,16 +3,17 @@
  */
 
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme, type Theme } from '@/src/design/theme';
 import { spacing, maxContentWidth } from '@/src/design/tokens';
 import { Plant } from '@/src/components/garden/Plant';
-import { GardenIcon } from '@/src/components/ui/Icon';
+import { GardenIcon, SettingsIcon } from '@/src/components/ui/Icon';
 import { useGardenStore } from '@/src/stores/garden';
 import { useRepositories } from '@/src/db/provider';
 import { getLogicalDate, nowISO } from '@/src/utils/date';
+import { useRouter } from 'expo-router';
 
 // Hardcoded for now until we build the settings UI
 const SETTINGS_DAY_START_HOUR = 4; 
@@ -22,6 +23,7 @@ export default function GardenScreen() {
   const insets = useSafeAreaInsets();
   const styles = makeStyles(theme);
   
+  const router = useRouter();
   const repositories = useRepositories();
   const { plants, isLoading, sync } = useGardenStore();
 
@@ -47,7 +49,12 @@ export default function GardenScreen() {
         />
       }
     >
-      <Text style={styles.title}>Your Garden</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>Your Garden</Text>
+        <Pressable onPress={() => router.push('/plants' as any)} style={styles.manageButton}>
+          <SettingsIcon size={24} color={theme.colors.textSecondary} />
+        </Pressable>
+      </View>
       <Text style={styles.subtitle}>
         Your habits grow here. Each category has a plant that reflects your consistency.
       </Text>
@@ -90,6 +97,14 @@ function makeStyles(theme: Theme) {
       width: '100%',
       padding: spacing.xl,
       paddingBottom: spacing['4xl'],
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    manageButton: {
+      padding: spacing.xs,
     },
     title: {
       fontFamily: 'Inter_700Bold',
