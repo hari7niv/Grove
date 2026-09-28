@@ -109,7 +109,11 @@ export default function NewRoutineScreen() {
                   </Text>
                 </View>
                 <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
-                  {isSelected && <CheckIcon size={14} color="#FFF" />}
+                  {isSelected ? (
+                    <Text style={{ color: '#FFF', fontSize: 12, fontFamily: 'Inter_600SemiBold' }}>
+                      {selectedExerciseIds.indexOf(ex.id) + 1}
+                    </Text>
+                  ) : null}
                 </View>
               </Pressable>
             );
