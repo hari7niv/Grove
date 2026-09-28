@@ -146,14 +146,12 @@ export default function LibraryScreen() {
           <Text style={styles.title}>Library</Text>
           <Text style={styles.subtitle}>Books & learning roadmaps.</Text>
         </View>
-        {activeTab === 'books' && (
-          <Pressable 
-            style={styles.addButton}
-            onPress={() => router.push('/book/new' as any)}
-          >
-            <PlusIcon size={20} color="#FFF" />
-          </Pressable>
-        )}
+        <Pressable 
+          style={styles.addButton}
+          onPress={() => activeTab === 'books' ? router.push('/book/new' as any) : router.push('/roadmap/new' as any)}
+        >
+          <PlusIcon size={20} color="#FFF" />
+        </Pressable>
       </View>
 
       <View style={styles.tabsContainer}>

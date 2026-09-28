@@ -3,10 +3,10 @@
  * Provides a React context for the active theme.
  */
 
-import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useColorScheme } from 'react-native';
-import { palette, spacing, radius, typeScale, elevation, motion } from './tokens';
-import { useRepositories } from '../db/provider';
+import { useDatabase } from '../db/provider';
+import { elevation, motion, palette, radius, spacing, typeScale } from './tokens';
 
 export interface ThemeColors {
   background: string;
@@ -124,7 +124,7 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({ override, children }: ThemeProviderProps) {
   const systemScheme = useColorScheme();
-  const repositories = useRepositories();
+  const { repositories, ready } = useDatabase();
   const [pref, setPref] = useState<'system' | 'light' | 'dark'>(override || 'system');
   const [reduceMotion, setReduceMotion] = useState(false);
 
@@ -133,6 +133,12 @@ export function ThemeProvider({ override, children }: ThemeProviderProps) {
       setPref(override);
       return;
     }
+    
+    // Only load settings if database is ready
+    if (!ready || !repositories) {
+      return;
+    }
+    
     const loadSettings = async () => {
       try {
         const settings = await repositories.settings.getAll();
@@ -144,7 +150,7 @@ export function ThemeProvider({ override, children }: ThemeProviderProps) {
     };
     loadSettings();
     // In a real app we might want to subscribe to settings changes.
-  }, [override, repositories]);
+  }, [override, repositories, ready]);
 
   const theme = useMemo(() => {
     let isDark = false;

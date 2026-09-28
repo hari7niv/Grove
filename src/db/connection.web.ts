@@ -1,6 +1,7 @@
-import initSqlJs, { Database, SqlValue } from 'sql.js';
-import * as idb from 'idb-keyval';
 import type { SQLiteDatabase } from 'expo-sqlite';
+import * as idb from 'idb-keyval';
+import initSqlJs, { Database } from 'sql.js';
+import { MIGRATIONS, getLatestVersion } from './schema';
 
 const DB_KEY = 'grove_web_db';
 let sqlDb: Database | null = null;
@@ -106,6 +107,49 @@ class WebSQLiteWrapper {
   }
 }
 
+/**
+ * Run pending migrations.
+ */
+async function runMigrations(db: WebSQLiteWrapper): Promise<void> {
+  // Create migrations tracking table
+  await db.execAsync(`
+    CREATE TABLE IF NOT EXISTS _migrations (
+      version INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      applied_at TEXT NOT NULL
+    )
+  `);
+
+  // Get current version
+  const result = await db.getFirstAsync<{ version: number }>(
+    'SELECT COALESCE(MAX(version), 0) as version FROM _migrations',
+  );
+  const currentVersion = result?.version ?? 0;
+  const targetVersion = getLatestVersion();
+
+  if (currentVersion >= targetVersion) return;
+
+  // Apply pending migrations
+  for (const migration of MIGRATIONS) {
+    if (migration.version <= currentVersion) continue;
+
+    console.log(`[DB] Applying migration ${migration.version}: ${migration.name}`);
+
+    for (const sql of migration.sql) {
+      await db.execAsync(sql);
+    }
+
+    await db.runAsync(
+      'INSERT INTO _migrations (version, name, applied_at) VALUES (?, ?, ?)',
+      migration.version,
+      migration.name,
+      new Date().toISOString(),
+    );
+  }
+
+  console.log(`[DB] Migrations complete. Version: ${targetVersion}`);
+}
+
 export async function getDatabase(): Promise<SQLiteDatabase> {
   if (sqlDb) {
     return new WebSQLiteWrapper() as unknown as SQLiteDatabase;
@@ -125,5 +169,32 @@ export async function getDatabase(): Promise<SQLiteDatabase> {
     sqlDb = new SQL.Database();
   }
   
-  return new WebSQLiteWrapper() as unknown as SQLiteDatabase;
+  // Enable foreign keys
+  sqlDb.exec('PRAGMA foreign_keys = ON');
+  
+  // Run migrations
+  const wrapper = new WebSQLiteWrapper();
+  await runMigrations(wrapper);
+  
+  return wrapper as unknown as SQLiteDatabase;
+}
+
+/**
+ * Close the database connection and save to IndexedDB.
+ */
+export async function closeDatabase(): Promise<void> {
+  if (sqlDb) {
+    await persist();
+    sqlDb.close();
+    sqlDb = null;
+  }
+}
+
+/**
+ * Reset the database (for testing/debug).
+ */
+export async function resetDatabase(): Promise<void> {
+  await closeDatabase();
+  await idb.del(DB_KEY);
+  sqlDb = null;
 }
