@@ -11,12 +11,14 @@ describe('useDebounce', () => {
   });
 
   it('should return the initial value immediately', () => {
+    // @ts-ignore: testing-library types are incorrect in this version
     const { result } = renderHook(() => useDebounce('initial', 500));
     expect(result.current).toBe('initial');
   });
 
   it('should debounce the value', () => {
-    const { result, rerender } = renderHook(({ value, delay }) => useDebounce(value, delay), {
+    // @ts-ignore: testing-library types are incorrect in this version
+    const { result, rerender } = renderHook(({ value, delay }: { value: string, delay: number }) => useDebounce(value, delay), {
       initialProps: { value: 'initial', delay: 500 },
     });
 
