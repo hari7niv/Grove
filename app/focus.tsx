@@ -10,7 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme, type Theme } from '@/src/design/theme';
 import { spacing } from '@/src/design/tokens';
 import { useRepositories } from '@/src/db/provider';
-import { ChevronLeftIcon, PlayIcon, PauseIcon, CheckIcon, XIcon } from '@/src/components/ui/Icon';
+import { ChevronLeftIcon, PlayIcon, PauseIcon, CheckIcon, XIcon, ClockIcon } from '@/src/components/ui/Icon';
 import type { Category, FocusMode } from '@/src/types/models';
 import { nowISO, getToday } from '@/src/utils/date';
 
@@ -237,7 +237,9 @@ export default function FocusScreen() {
           <ChevronLeftIcon size={24} color={theme.colors.textPrimary} />
         </Pressable>
         <Text style={styles.title}>Start Focus</Text>
-        <View style={{ width: 24 }} />
+        <Pressable onPress={() => router.push('/focus-history' as any)} style={styles.backButton}>
+          <ClockIcon size={24} color={theme.colors.textSecondary} />
+        </Pressable>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
