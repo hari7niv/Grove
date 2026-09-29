@@ -19,6 +19,7 @@ if (Platform.OS === 'web') {
 import { ThemeProvider, useTheme } from '@/src/design/theme';
 import { DatabaseProvider, useDatabase } from '@/src/db/provider';
 import { View, Text, ActivityIndicator } from 'react-native';
+import { CommandPalette } from '@/src/components/CommandPalette';
 
 export {
   ErrorBoundary,
@@ -84,6 +85,7 @@ function RootLayoutNav() {
   return (
     <>
       <StatusBar style={theme.dark ? 'light' : 'dark'} />
+      <CommandPalette />
       <Stack
         screenOptions={{
           headerShown: false,

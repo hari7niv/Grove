@@ -244,6 +244,32 @@ export const MIGRATIONS: Migration[] = [
         ('units', 'metric')`,
     ],
   },
+  {
+    version: 2,
+    name: 'performance_indexes',
+    sql: [
+      `CREATE INDEX IF NOT EXISTS idx_task_due_date ON task(due_date)`,
+      `CREATE INDEX IF NOT EXISTS idx_task_status ON task(status)`,
+      `CREATE INDEX IF NOT EXISTS idx_task_category ON task(category_id)`,
+      
+      `CREATE INDEX IF NOT EXISTS idx_exercise_session_exercise ON exercise_session(exercise_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_exercise_session_started ON exercise_session(started_at)`,
+      
+      `CREATE INDEX IF NOT EXISTS idx_focus_session_category ON focus_session(category_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_focus_session_started ON focus_session(started_at)`,
+      
+      `CREATE INDEX IF NOT EXISTS idx_book_status ON book(status)`,
+      
+      `CREATE INDEX IF NOT EXISTS idx_roadmap_item_roadmap ON roadmap_item(roadmap_id)`,
+      
+      `CREATE INDEX IF NOT EXISTS idx_article_feed ON article(feed_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_article_read_saved ON article(is_read, is_saved)`,
+      `CREATE INDEX IF NOT EXISTS idx_article_published ON article(published_at)`,
+      
+      `CREATE INDEX IF NOT EXISTS idx_habit_category ON habit(category_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_rest_token_habit ON rest_token(habit_id, logical_date)`,
+    ],
+  }
 ];
 
 /** Get the latest migration version */

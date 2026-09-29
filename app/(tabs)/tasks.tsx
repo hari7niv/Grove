@@ -15,6 +15,39 @@ import type { Task } from '@/src/types/models';
 import { getToday } from '@/src/utils/date';
 import { useActivityLogger } from '@/src/hooks/useActivityLogger';
 
+const TaskItem = React.memo(({ task, onToggle }: { task: Task, onToggle: (task: Task) => void }) => {
+  const router = useRouter();
+  const theme = useTheme();
+  const styles = makeStyles(theme);
+  
+  return (
+    <Pressable 
+      style={styles.taskCard}
+      onPress={() => router.push(`/task/${task.id}` as any)}
+    >
+      <Pressable 
+        style={styles.checkbox} 
+        onPress={() => onToggle(task)}
+        hitSlop={12}
+      >
+        <CheckIcon size={14} color="transparent" />
+      </Pressable>
+      
+      <View style={styles.taskContent}>
+        <Text style={styles.taskTitle}>{task.title}</Text>
+        {(task.description || task.dueTime) && (
+          <Text style={styles.taskSubtitle} numberOfLines={1}>
+            {task.dueTime ? `${task.dueTime} • ` : ''}{task.description}
+          </Text>
+        )}
+      </View>
+      
+      {task.priority === 'urgent' && <View style={[styles.priorityDot, { backgroundColor: theme.colors.dying }]} />}
+      {task.priority === 'high' && <View style={[styles.priorityDot, { backgroundColor: theme.colors.wilting }]} />}
+    </Pressable>
+  );
+});
+
 export default function TasksScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
@@ -85,31 +118,7 @@ export default function TasksScreen() {
   const someday = tasks.filter(t => !t.dueDate);
 
   const renderTask = (task: Task) => (
-    <Pressable 
-      key={task.id} 
-      style={styles.taskCard}
-      onPress={() => router.push(`/task/${task.id}` as any)}
-    >
-      <Pressable 
-        style={styles.checkbox} 
-        onPress={() => toggleTask(task)}
-        hitSlop={12}
-      >
-        <CheckIcon size={14} color="transparent" />
-      </Pressable>
-      
-      <View style={styles.taskContent}>
-        <Text style={styles.taskTitle}>{task.title}</Text>
-        {(task.description || task.dueTime) && (
-          <Text style={styles.taskSubtitle} numberOfLines={1}>
-            {task.dueTime ? `${task.dueTime} • ` : ''}{task.description}
-          </Text>
-        )}
-      </View>
-      
-      {task.priority === 'urgent' && <View style={[styles.priorityDot, { backgroundColor: theme.colors.dying }]} />}
-      {task.priority === 'high' && <View style={[styles.priorityDot, { backgroundColor: theme.colors.wilting }]} />}
-    </Pressable>
+    <TaskItem key={task.id} task={task} onToggle={toggleTask} />
   );
 
   return (
