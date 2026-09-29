@@ -1,16 +1,12 @@
 /** @type {import('jest').Config} */
 module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
+  preset: 'jest-expo',
   roots: ['<rootDir>/__tests__', '<rootDir>/src'],
   testMatch: ['**/*.test.ts', '**/*.test.tsx'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
-  },
-  transform: {
-    '^.+\\.tsx?$': ['ts-jest', {
-      tsconfig: 'tsconfig.json',
-    }],
+    '\\.wasm$': '<rootDir>/__mocks__/wasmMock.js',
+    '^idb-keyval$': '<rootDir>/__mocks__/idb-keyval.js',
   },
   // Ignore expo and react-native modules for pure logic tests
   transformIgnorePatterns: [

@@ -201,8 +201,8 @@ function parseAtom(xml: string): ParsedFeed {
 /**
  * Parse OPML XML into a flat list of feed URLs with titles.
  */
-export function parseOPML(xml: string): Array<{ title: string; url: string }> {
-  const results: Array<{ title: string; url: string }> = [];
+export function parseOPML(xml: string): { title: string; url: string }[] {
+  const results: { title: string; url: string }[] = [];
   const outlineRegex = /<outline[^>]*>/gi;
   let match: RegExpExecArray | null;
 
@@ -225,7 +225,7 @@ export function parseOPML(xml: string): Array<{ title: string; url: string }> {
  * Generate OPML XML from a list of feeds.
  */
 export function generateOPML(
-  feeds: Array<{ title: string; url: string; siteUrl?: string | null }>
+  feeds: { title: string; url: string; siteUrl?: string | null }[]
 ): string {
   const outlines = feeds
     .map(

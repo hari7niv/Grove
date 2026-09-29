@@ -366,13 +366,13 @@ export function computeHeatmap(
   startDate: string,
   endDate: string,
   requirementValue: number = 1,
-): Array<{ date: string; level: number }> {
+): { date: string; level: number }[] {
   const activityMap = new Map<string, DayActivity>();
   for (const a of activities) {
     activityMap.set(a.date, a);
   }
 
-  const result: Array<{ date: string; level: number }> = [];
+  const result: { date: string; level: number }[] = [];
   const totalDays = daysBetween(startDate, endDate);
 
   for (let i = 0; i <= totalDays; i++) {

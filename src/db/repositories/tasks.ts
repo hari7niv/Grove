@@ -46,7 +46,7 @@ export function createTaskRepository(db: SQLiteDatabase): TaskRepository {
         task.status,
         task.categoryId ?? null,
         task.parentId ?? null,
-        task.tags.length > 0 ? JSON.stringify(task.tags) : null,
+        (task.tags?.length || 0) > 0 ? JSON.stringify(task.tags) : null,
         task.recurrenceRule ?? null,
         task.completedAt ?? null,
         now,

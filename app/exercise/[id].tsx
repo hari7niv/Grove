@@ -12,7 +12,7 @@ import { useTheme, type Theme } from '@/src/design/theme';
 import { spacing } from '@/src/design/tokens';
 import { useRepositories } from '@/src/db/provider';
 import { ChevronLeftIcon, PlayIcon, PauseIcon, CheckIcon, SettingsIcon } from '@/src/components/ui/Icon';
-import type { Exercise } from '@/src/types/models';
+import type { Exercise, ExerciseSession } from '@/src/types/models';
 import { nowISO } from '@/src/utils/date';
 import { useActivityLogger } from '@/src/hooks/useActivityLogger';
 
@@ -38,6 +38,9 @@ export default function ExerciseSessionScreen() {
 
   // Overall session state
   const [startedAt, setStartedAt] = useState<string | null>(null);
+  
+  // History state
+  const [history, setHistory] = useState<ExerciseSession[]>([]);
 
   useEffect(() => {
     async function load() {
@@ -49,6 +52,9 @@ export default function ExerciseSessionScreen() {
           setTimeRemaining(ex.targetDuration || 0);
         }
       }
+      
+      const sessions = await repositories.exerciseSessions.getByExerciseId(id);
+      setHistory(sessions.sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
     }
     load();
   }, [id, repositories]);
@@ -202,6 +208,25 @@ export default function ExerciseSessionScreen() {
                 ))}
               </View>
             )}
+          </View>
+        )}
+
+        {/* History Section */}
+        {history.length > 0 && (
+          <View style={[styles.history, { marginTop: spacing['4xl'] }]}>
+            <Text style={styles.historyTitle}>Past Sessions & Personal Bests</Text>
+            {history.slice(0, 5).map((session) => (
+              <View key={session.id} style={styles.historyItem}>
+                <Text style={styles.historyText}>
+                  {new Date(session.createdAt).toLocaleDateString()}
+                </Text>
+                <Text style={styles.historyValue}>
+                  {exercise.mode === 'timer' 
+                    ? formatTime(session.duration || 0)
+                    : `${session.repsCompleted || 0} reps (${session.setsCompleted || 0} sets)`}
+                </Text>
+              </View>
+            ))}
           </View>
         )}
       </ScrollView>
