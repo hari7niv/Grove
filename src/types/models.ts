@@ -244,6 +244,7 @@ export interface AppSettings {
   reduceMotion: boolean;
   units: 'metric' | 'imperial';
   targetRole: 'swe' | 'ml_infra';
+  rssProxyUrl: string;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -254,4 +255,5 @@ export const DEFAULT_SETTINGS: AppSettings = {
   reduceMotion: false,
   units: 'metric',
   targetRole: 'swe',
+  rssProxyUrl: 'https://api.allorigins.win/raw?url=',
 };

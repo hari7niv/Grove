@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Alert, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Alert, Platform, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme, type Theme } from '@/src/design/theme';
@@ -189,6 +189,19 @@ export default function SettingsScreen() {
               ))}
             </View>
           </View>
+          
+          <View style={styles.rowVertical}>
+            <Text style={styles.rowLabel}>RSS Proxy URL</Text>
+            <TextInput
+              style={styles.textInput}
+              value={settings.rssProxyUrl}
+              onChangeText={v => updateSetting('rssProxyUrl', v)}
+              placeholder="e.g. https://api.allorigins.win/raw?url="
+              placeholderTextColor={theme.colors.textTertiary}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </View>
         </View>
 
         {/* Data & Privacy */}
@@ -267,6 +280,25 @@ function makeStyles(theme: Theme) {
       fontFamily: 'Inter_500Medium',
       fontSize: 16,
       color: theme.colors.textPrimary,
+    },
+    rowVertical: {
+      backgroundColor: theme.colors.surface,
+      padding: spacing.lg,
+      borderRadius: 12,
+      marginBottom: spacing.sm,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    textInput: {
+      marginTop: spacing.sm,
+      fontFamily: 'Inter_400Regular',
+      fontSize: 15,
+      color: theme.colors.textSecondary,
+      backgroundColor: theme.colors.background,
+      padding: spacing.sm,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
     },
     segmentedControl: {
       flexDirection: 'row',

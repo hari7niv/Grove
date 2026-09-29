@@ -42,6 +42,7 @@ export function createSettingsRepository(db: SQLiteDatabase): SettingsRepository
         reduceMotion: (map.get('reduceMotion') ?? String(DEFAULT_SETTINGS.reduceMotion)) === 'true',
         units: (map.get('units') ?? DEFAULT_SETTINGS.units) as AppSettings['units'],
         targetRole: (map.get('targetRole') ?? DEFAULT_SETTINGS.targetRole) as AppSettings['targetRole'],
+        rssProxyUrl: map.get('rssProxyUrl') ?? DEFAULT_SETTINGS.rssProxyUrl,
       };
     },
   };

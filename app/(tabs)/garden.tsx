@@ -13,7 +13,7 @@ import { GardenIcon, SettingsIcon } from '@/src/components/ui/Icon';
 import { useGardenStore } from '@/src/stores/garden';
 import { useRepositories } from '@/src/db/provider';
 import { getLogicalDate, nowISO } from '@/src/utils/date';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 
 
 export default function GardenScreen() {
@@ -33,9 +33,11 @@ export default function GardenScreen() {
   };
 
   // Sync on mount
-  useEffect(() => {
-    handleRefresh();
-  }, [repositories]);
+  useFocusEffect(
+    React.useCallback(() => {
+      handleRefresh();
+    }, [repositories])
+  );
 
   return (
     <ScrollView

@@ -10,16 +10,13 @@ import { parseFeed, type ParsedFeed, type ParsedArticle } from './feed-parser';
 import type { Repositories } from '../db/repositories';
 import { nowISO } from '../utils/date';
 
-/** Default CORS proxy for web — allorigins.win is a free, reliable proxy */
-const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
-
 /**
  * Fetch a feed URL and return the parsed result.
  * Uses a CORS proxy on web platforms.
  */
-export async function fetchFeed(feedUrl: string): Promise<ParsedFeed> {
+export async function fetchFeed(feedUrl: string, proxyUrl: string): Promise<ParsedFeed> {
   const url = Platform.OS === 'web'
-    ? `${CORS_PROXY}${encodeURIComponent(feedUrl)}`
+    ? `${proxyUrl}${encodeURIComponent(feedUrl)}`
     : feedUrl;
 
   const response = await fetch(url, {
@@ -50,7 +47,8 @@ export async function refreshFeed(
   feedUrl: string,
   repositories: Repositories,
 ): Promise<number> {
-  const parsed = await fetchFeed(feedUrl);
+  const settings = await repositories.settings.getAll();
+  const parsed = await fetchFeed(feedUrl, settings.rssProxyUrl);
   let newCount = 0;
 
   for (const article of parsed.articles) {
@@ -115,7 +113,8 @@ export async function addFeedByUrl(
   }
 
   // Fetch and parse to get the title
-  const parsed = await fetchFeed(feedUrl);
+  const settings = await repositories.settings.getAll();
+  const parsed = await fetchFeed(feedUrl, settings.rssProxyUrl);
 
   const feed = await repositories.feedSources.create({
     title: parsed.title,

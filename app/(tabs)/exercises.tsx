@@ -3,10 +3,10 @@
  * Phase 3: Exercise listing and routine management.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 
 import { useTheme, type Theme } from '@/src/design/theme';
 import { spacing, maxContentWidth } from '@/src/design/tokens';
@@ -45,9 +45,11 @@ export default function ExercisesScreen() {
     }
   };
 
-  useEffect(() => {
-    loadData();
-  }, [repositories, activeTab]);
+  useFocusEffect(
+    React.useCallback(() => {
+      loadData();
+    }, [repositories, activeTab])
+  );
 
   return (
     <ScrollView

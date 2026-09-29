@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Platform, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 
 import { useTheme, type Theme } from '@/src/design/theme';
 import { spacing, maxContentWidth, radius, elevation } from '@/src/design/tokens';
@@ -23,11 +23,13 @@ export default function HomeScreen() {
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [logicalToday, setLogicalToday] = useState('');
 
-  useEffect(() => {
-    if (ready && repositories) {
-      loadData();
-    }
-  }, [ready, repositories]);
+  useFocusEffect(
+    React.useCallback(() => {
+      if (ready && repositories) {
+        loadData();
+      }
+    }, [ready, repositories])
+  );
 
   const loadData = async () => {
     if (!repositories) return;

@@ -96,9 +96,9 @@ export async function importDatabase(db: SQLiteDatabase, rawData: any): Promise<
 /**
  * Helper to download JSON on web or save to file on native.
  */
-export async function downloadJson(filename: string, jsonString: string): Promise<void> {
+export async function downloadStringAsFile(filename: string, content: string, mimeType: string): Promise<void> {
   if (Platform.OS === 'web') {
-    const blob = new Blob([jsonString], { type: 'application/json' });
+    const blob = new Blob([content], { type: mimeType });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -112,7 +112,7 @@ export async function downloadJson(filename: string, jsonString: string): Promis
       const dir = LegacyFS.documentDirectory;
       if (!dir) throw new Error('Document directory not available');
       const fileUri = `${dir}${filename}`;
-      await LegacyFS.writeAsStringAsync(fileUri, jsonString, { encoding: LegacyFS.EncodingType.UTF8 });
+      await LegacyFS.writeAsStringAsync(fileUri, content, { encoding: LegacyFS.EncodingType.UTF8 });
       const canShare = await Sharing.isAvailableAsync();
       if (canShare) {
         await Sharing.shareAsync(fileUri);
@@ -126,15 +126,19 @@ export async function downloadJson(filename: string, jsonString: string): Promis
   }
 }
 
+export async function downloadJson(filename: string, jsonString: string): Promise<void> {
+  return downloadStringAsFile(filename, jsonString, 'application/json');
+}
+
 /**
  * Prompt the user to pick a JSON file and return its contents.
  */
-export async function pickJsonFile(): Promise<string | null> {
+export async function pickFileWithAccept(mimeType: string, ext?: string): Promise<string | null> {
   if (Platform.OS === 'web') {
     return new Promise((resolve) => {
       const input = document.createElement('input');
       input.type = 'file';
-      input.accept = 'application/json';
+      input.accept = ext || mimeType;
       input.onchange = (e: any) => {
         const file = e.target?.files?.[0];
         if (!file) return resolve(null);
@@ -148,7 +152,7 @@ export async function pickJsonFile(): Promise<string | null> {
   } else {
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: 'application/json',
+        type: mimeType,
         copyToCacheDirectory: true,
       });
       if (result.canceled) return null;
@@ -163,4 +167,8 @@ export async function pickJsonFile(): Promise<string | null> {
       return null;
     }
   }
+}
+
+export async function pickJsonFile(): Promise<string | null> {
+  return pickFileWithAccept('application/json');
 }

@@ -34,7 +34,9 @@ import {
 } from '@/src/components/ui/Icon';
 import { useRepositories } from '@/src/db/provider';
 import type { FeedSource, Article } from '@/src/types/models';
-import { addFeedByUrl, refreshAllFeeds } from '@/src/engine/feed-service';
+import { addFeedByUrl, refreshAllFeeds, refreshFeed } from '@/src/engine/feed-service';
+import { generateOPML, parseOPML } from '@/src/engine/feed-parser';
+import { downloadStringAsFile, pickFileWithAccept } from '@/src/engine/export-import';
 
 type ViewMode = 'all' | 'unread' | 'saved' | 'feeds';
 
@@ -48,8 +50,10 @@ export default function FeedsScreen() {
   const [viewMode, setViewMode] = useState<ViewMode>('unread');
   const [articles, setArticles] = useState<Article[]>([]);
   const [feeds, setFeeds] = useState<FeedSource[]>([]);
+  const [feedErrors, setFeedErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
 
   // Add feed modal state
   const [showAddFeed, setShowAddFeed] = useState(false);
@@ -63,9 +67,7 @@ export default function FeedsScreen() {
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [fetchedFeeds] = await Promise.all([
-        repositories.feedSources.getAll(),
-      ]);
+      const fetchedFeeds = await repositories.feedSources.getAll();
       setFeeds(fetchedFeeds);
 
       let fetchedArticles: Article[];
@@ -91,29 +93,41 @@ export default function FeedsScreen() {
     }
   }, [repositories, viewMode, searchQuery]);
 
+  const hasRefreshed = useRef(false);
+
+  const handleRefresh = async (silent = false) => {
+    setIsRefreshing(true);
+    setFeedErrors({});
+    const feedsToRefresh = await repositories.feedSources.getAll();
+    let newCount = 0;
+    const errors: Record<string, string> = {};
+    for (const feed of feedsToRefresh) {
+      try {
+        const count = await refreshFeed(feed.id, feed.url, repositories);
+        newCount += count;
+      } catch (e: any) {
+        errors[feed.id] = e.message || 'Failed to fetch';
+      }
+    }
+    setFeedErrors(errors);
+    setIsRefreshing(false);
+    if (newCount > 0) {
+      if (!silent) showAlert('Feeds Refreshed', `${newCount} new article${newCount === 1 ? '' : 's'} found.`);
+      await loadData();
+    } else {
+      if (!silent) showAlert('All Caught Up', 'No new articles found.');
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
       loadData();
+      if (!hasRefreshed.current) {
+        hasRefreshed.current = true;
+        handleRefresh(true);
+      }
     }, [loadData])
   );
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    try {
-      const newCount = await refreshAllFeeds(repositories);
-      if (newCount > 0) {
-        showAlert('Feeds Refreshed', `${newCount} new article${newCount === 1 ? '' : 's'} found.`);
-      } else {
-        showAlert('All Caught Up', 'No new articles found.');
-      }
-      await loadData();
-    } catch (e) {
-      console.error(e);
-      showAlert('Error', 'Failed to refresh feeds.');
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
 
   const handleAddFeed = async () => {
     const url = feedUrl.trim();
@@ -158,6 +172,46 @@ export default function FeedsScreen() {
           },
         ]
       );
+    }
+  };
+
+  const handleExportOPML = async () => {
+    try {
+      const allFeeds = await repositories.feedSources.getAll();
+      const opmlStr = generateOPML(allFeeds.map(f => ({ title: f.title, url: f.url, siteUrl: f.siteUrl })));
+      await downloadStringAsFile('grove-feeds.opml', opmlStr, 'text/xml');
+    } catch (e: any) {
+      showAlert('Error', e.message || 'Failed to export OPML');
+    }
+  };
+
+  const handleImportOPML = async () => {
+    try {
+      const xmlStr = await pickFileWithAccept('text/xml', '.opml');
+      if (!xmlStr) return;
+      setIsImporting(true);
+      const parsedFeeds = parseOPML(xmlStr);
+      if (parsedFeeds.length === 0) {
+        showAlert('Import Failed', 'No valid feeds found in the OPML file.');
+        setIsImporting(false);
+        return;
+      }
+
+      let added = 0;
+      for (const feed of parsedFeeds) {
+        try {
+          await addFeedByUrl(feed.url, repositories);
+          added++;
+        } catch {
+          // ignore duplicate or failed individual feeds
+        }
+      }
+      showAlert('Import Complete', `Successfully imported ${added} feed${added === 1 ? '' : 's'}.`);
+      await loadData();
+    } catch (e: any) {
+      showAlert('Error', e.message || 'Failed to import OPML');
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -271,12 +325,17 @@ export default function FeedsScreen() {
   );
 
   const renderFeedItem = ({ item }: { item: FeedSource }) => (
-    <View style={styles.feedCard}>
+    <View style={[styles.feedCard, feedErrors[item.id] && styles.feedCardError]}>
       <View style={styles.feedInfo}>
-        <RssIcon size={16} color={theme.colors.accent} />
+        <RssIcon size={16} color={feedErrors[item.id] ? theme.colors.dying : theme.colors.accent} />
         <View style={{ flex: 1, marginLeft: spacing.sm }}>
           <Text style={styles.feedTitle}>{item.title}</Text>
           <Text style={styles.feedUrl} numberOfLines={1}>{item.url}</Text>
+          {feedErrors[item.id] && (
+            <Text style={styles.feedErrorText} numberOfLines={2}>
+              {feedErrors[item.id]}
+            </Text>
+          )}
         </View>
       </View>
       <Pressable
@@ -303,7 +362,7 @@ export default function FeedsScreen() {
         <View style={styles.headerActions}>
           <Pressable
             style={styles.headerButton}
-            onPress={handleRefresh}
+            onPress={() => handleRefresh()}
             disabled={isRefreshing}
           >
             {isRefreshing ? (
@@ -347,6 +406,17 @@ export default function FeedsScreen() {
         {renderViewToggle('saved', 'Saved')}
         {renderViewToggle('feeds', 'Feeds')}
       </View>
+
+      {viewMode === 'feeds' && (
+        <View style={styles.opmlActions}>
+          <Pressable style={styles.opmlButton} onPress={handleImportOPML} disabled={isImporting}>
+            {isImporting ? <ActivityIndicator size="small" color={theme.colors.accent} /> : <Text style={styles.opmlButtonText}>Import OPML</Text>}
+          </Pressable>
+          <Pressable style={styles.opmlButton} onPress={handleExportOPML}>
+            <Text style={styles.opmlButtonText}>Export OPML</Text>
+          </Pressable>
+        </View>
+      )}
 
       {/* Add Feed inline form */}
       {showAddFeed && (
@@ -542,6 +612,26 @@ function makeStyles(theme: Theme) {
       color: theme.colors.textPrimary,
       fontFamily: 'Inter_600SemiBold',
     },
+    // OPML Actions
+    opmlActions: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+      marginBottom: spacing.xl,
+    },
+    opmlButton: {
+      flex: 1,
+      backgroundColor: theme.colors.surfaceRaised,
+      paddingVertical: spacing.sm,
+      borderRadius: 8,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    opmlButtonText: {
+      fontFamily: 'Inter_500Medium',
+      fontSize: 14,
+      color: theme.colors.textSecondary,
+    },
     // Add feed form
     addFeedForm: {
       backgroundColor: theme.colors.surface,
@@ -669,6 +759,15 @@ function makeStyles(theme: Theme) {
       fontSize: 13,
       color: theme.colors.textTertiary,
       marginTop: 2,
+    },
+    feedCardError: {
+      borderColor: theme.colors.dying,
+    },
+    feedErrorText: {
+      fontFamily: 'Inter_400Regular',
+      fontSize: 12,
+      color: theme.colors.dying,
+      marginTop: 4,
     },
     deleteFeedButton: {
       padding: spacing.sm,
